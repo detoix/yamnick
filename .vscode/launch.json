@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Some",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-some",
+            "program": "${workspaceFolder}/Some/bin/Debug/netcoreapp3.1/Some.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Some",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Run Body",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-body",
+            "program": "${workspaceFolder}/Body/bin/Debug/netcoreapp3.1/Body.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}
