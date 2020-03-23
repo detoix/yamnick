@@ -23,7 +23,7 @@ namespace Contracts
             BinaryFormatter binForm = new BinaryFormatter();
             memStream.Write(arrBytes, 0, arrBytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
-            object obj = (object)binForm.Deserialize(memStream);
+            object obj = binForm.Deserialize(memStream);
 
             return obj;
         }

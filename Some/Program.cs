@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Text;
 using Akka.Actor;
 using Contracts;
-using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -13,30 +12,44 @@ namespace Some
         static void Main(string[] args)
         {
             var factory = new ConnectionFactory() 
-            { 
+            {
                 Uri = new Uri(args[0])
-                // Uri = new Uri("amqps://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk")
             };
             using(var connection = factory.CreateConnection())
             using(var channel = connection.CreateModel())
-            using (var remoteSystem = ActorSystem.Create("System"))
+            using (var system = ActorSystem.Create("System"))
             {
-                var actor = remoteSystem.ActorOf(Props.Create<BaseActor>());
-                foreach (var type in new[] { nameof(MessageToDeliver) })
+                Action<string> respondUntyped = content =>
                 {
-                    channel.QueueDeclare(queue: type,
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
+                    channel.BasicPublish(exchange: "",
+                        routingKey: "ResponsesToClient",
+                        basicProperties: null,
+                        body: Encoding.UTF8.GetBytes(content));
+                };
 
-                    var consumer = new EventingBasicConsumer(channel);
-                    consumer.Received += 
-                        (model, ea) => actor.Tell(ea.Body.ToObject());
-                    channel.BasicConsume(queue: type,
-                                        autoAck: true,
-                                        consumer: consumer);
-                }
+                Action<object> respondTyped = content =>
+                {
+                    channel.BasicPublish(exchange: "",
+                        routingKey: "TypedMessage",
+                        basicProperties: null,
+                        body: content.ToByteArray());
+                };
+
+                var actor = system.ActorOf(
+                    Props.Create<RootActor>(respondUntyped, respondTyped));
+                var clientCommandsConsumer = new EventingBasicConsumer(channel);
+                clientCommandsConsumer.Received += (model, ea) => 
+                {
+                    actor.Tell(Encoding.UTF8.GetString(ea.Body));
+                };
+                channel.BasicConsume(queue: "ClientCommands",
+                                    autoAck: true,
+                                    consumer: clientCommandsConsumer);
+                var typedMessageConsumer = new EventingBasicConsumer(channel);
+                typedMessageConsumer.Received += (model, ea) => actor.Tell(ea.Body.ToObject());
+                channel.BasicConsume(queue: "TypedMessage",
+                                    autoAck: true,
+                                    consumer: typedMessageConsumer);
 
                 do
                 {
@@ -46,22 +59,27 @@ namespace Some
         }
     }
 
-    class BaseActor : ReceiveActor
+    class RootActor : ReceiveActor
     {
-        public BaseActor()
+        private Action<string> RespondUntyped { get; }
+        private Action<object> RespondTyped { get; }
+
+        public RootActor(
+            Action<string> respondUntyped,
+            Action<object> respondTyped)
         {
+            this.RespondUntyped = respondUntyped;
+            this.RespondTyped = respondTyped;
+
             this.Receive<MessageToDeliver>(args => 
             {
-                System.Console.WriteLine(args.Data);
+                System.Console.WriteLine("REAL" + args.Data);
             });
-        }
-    }
-
-    public class ChatHub : Hub
-    {
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            this.Receive<string>(args =>
+            {
+                System.Console.WriteLine($"Server received message of {args}");
+                this.RespondUntyped("Some basic response");
+            });
         }
     }
 }

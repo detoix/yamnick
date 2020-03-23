@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build-some",
             "program": "${workspaceFolder}/Some/bin/Debug/netcoreapp3.1/Some.dll",
-            "args": [],
+            "args": ["amqps://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk"],
             "cwd": "${workspaceFolder}/Some",
             "console": "internalConsole",
             "stopAtEntry": false
