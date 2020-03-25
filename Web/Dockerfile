@@ -3,13 +3,11 @@ FROM node:8.11-alpine
 RUN mkdir server
 WORKDIR /server
 
-COPY package.json .
+COPY . .
 
 RUN npm install
+RUN npm run build
 
 EXPOSE 8080
 
-# Bundle app source
-COPY . .
-
-CMD npm run build && AMQP=$AMQPURL node src/server/index.js
+CMD AMQP=$AMQPURL node src/server/index.js
