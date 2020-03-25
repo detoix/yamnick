@@ -7,7 +7,7 @@ export class Home extends Component {
   constructor(props) {
       super(props)
       this.state = {
-        socket: socketIOClient("http://127.0.0.1:8080")
+        socket: socketIOClient(this.props.location)
       }
       this.tell = this.tell.bind(this)
       this.receive = this.receive.bind(this)

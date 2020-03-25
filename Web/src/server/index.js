@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-amqp.connect('amqp://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk', function(error0, connection) {
+amqp.connect(process.env.AMQP, function(error0, connection) {
     if (error0) {
         throw error0;
     }
