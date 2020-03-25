@@ -15,7 +15,10 @@ export class Home extends Component {
   }
 
   tell() {
-    this.state.socket.emit("query", "dupa1")
+    let o = {
+      data: "dupa1"
+    }
+    this.state.socket.emit("query", JSON.stringify(o))
   }
 
   receive(data) {

@@ -1,5 +1,6 @@
 FROM node:8.11-alpine
 
+RUN npm i npm@latest -g
 RUN mkdir server
 WORKDIR /server
 

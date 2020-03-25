@@ -21,7 +21,7 @@
             "request": "launch",
             "preLaunchTask": "build-body",
             "program": "${workspaceFolder}/Body/bin/Debug/netcoreapp3.1/Body.dll",
-            "args": [],
+            "args": ["amqps://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"

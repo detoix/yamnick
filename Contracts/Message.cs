@@ -5,7 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace Contracts
 {
     [Serializable]
-    public class MessageToDeliver
+    public class TypedMessage
     {
         public string Data { get; set; }
     }
