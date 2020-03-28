@@ -91,36 +91,21 @@ namespace Some
             this.SendUntyped = sendUntyped;
             this.SendTyped = sendTyped;
 
-            this.Receive<TypedMessage>(args => 
+            this.Receive<TypedMessage>(args =>
             {
-                System.Console.WriteLine("REAL" + args.Data);
-
-                var crawlRequest = new CrawlCommand()
+                if (args.CrawlCommand != null)
                 {
-                    Visit = "https://www.money.pl/sekcja/koronawirus/",
-                    Spiders = new[]
-                    {
-                        new CrawlCommand()
-                        {
-                            Selector = "p.sc-1mh2gec-0",
-                            Tag = "extracted_nested"
-                        },
-                        new CrawlCommand()
-                        {
-                            Visit = "a.sc-17rdsii-2::attr(href)",
-                            Spiders = new[]
-                            {
-                                new CrawlCommand()
-                                {
-                                    Selector = "div.b300",
-                                    Tag = "found"
-                                }
-                            }
-                        }
-                    }
-                };
+                    System.Console.WriteLine($"Received {nameof(args.CrawlCommand)} with reply to {args.ReplyTo}, forwarding to self...");
+                    args.CrawlCommand.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.CrawlCommand);
+                }
+            });
 
-                var message = JsonSerializer.Serialize(crawlRequest, new JsonSerializerOptions()
+            this.Receive<CrawlCommand>(args => 
+            {
+                System.Console.WriteLine($"Processing {args}");
+
+                var message = JsonSerializer.Serialize(args, new JsonSerializerOptions()
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });

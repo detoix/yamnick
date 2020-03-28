@@ -25,7 +25,7 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                   throw error2;
                 }
 
-                socket.on("query", (data)=>{
+                socket.on("query_issued", (data) => {
                     console.log("Server received query of", data)
                     channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: q.queue });
                 });
@@ -33,7 +33,8 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 channel.consume(q.queue, function(msg) {
                     let message = msg.content.toString()
                     console.log("Server received response of length:", message.length);
-                    socket.emit("response", "Received response of length: " + message.length)
+                    socket.broadcast.emit("event", "something happend")
+                    socket.emit("response_received", message)
                 }, { noAck: true });
             });
 

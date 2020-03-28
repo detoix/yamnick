@@ -11,14 +11,35 @@ export class Home extends Component {
       }
       this.tell = this.tell.bind(this)
       this.receive = this.receive.bind(this)
-      this.state.socket.on("response", data => this.receive(data))
+      this.state.socket.on("response_received", data => this.receive(data))
+      this.state.socket.on("event", data => this.receive(data))
   }
 
   tell() {
-    let o = {
-      data: "dupa1"
+    let crawlRequest = {
+      crawlCommand: 
+      {
+        visit: "https://www.money.pl/sekcja/koronawirus/",
+        spiders: 
+        [
+          {
+            selector: "p.sc-1mh2gec-0",
+            tag: "extracted_nested"
+          },
+          {
+            visit: "a.sc-17rdsii-2::attr(href)",
+            spiders: 
+            [
+              {
+                selector: "div.b300",
+                tag: "found"
+              },
+            ]
+          }
+        ]
+      }
     }
-    this.state.socket.emit("query", JSON.stringify(o))
+    this.state.socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
   receive(data) {

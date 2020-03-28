@@ -5,14 +5,19 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace Contracts
 {
     [Serializable]
-    public class TypedMessage
+    public abstract class Message
     {
-        public string Data { get; set; }
         public string ReplyTo { get; set; }
     }
 
     [Serializable]
-    public class CrawlCommand
+    public class TypedMessage : Message
+    {
+        public CrawlCommand CrawlCommand { get; set; }
+    }
+
+    [Serializable]
+    public class CrawlCommand : Message
     {
         public string Visit { get; set; }
         public string Selector { get; set; }
