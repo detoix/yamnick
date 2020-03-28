@@ -20,33 +20,35 @@ namespace Some
             using(var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
-                Action<string> respondUntyped = content =>
+                SendUntyped sendUntyped = (chanell, message) =>
                 {
-                    channel.BasicPublish(exchange: "",
-                        routingKey: "ResponsesToClient",
+                    channel.BasicPublish(
+                        exchange: string.Empty,
+                        routingKey: chanell,
                         basicProperties: null,
-                        body: Encoding.UTF8.GetBytes(content));
+                        body: Encoding.UTF8.GetBytes(message));
                 };
 
-                Action<object> respondTyped = content =>
+                SendTyped sendTyped = (chanell, message) =>
                 {
-                    channel.BasicPublish(exchange: "",
-                        routingKey: "TypedMessage",
+                    channel.BasicPublish(
+                        exchange: string.Empty,
+                        routingKey: chanell,
                         basicProperties: null,
-                        body: content.ToByteArray());
+                        body: message.ToByteArray());
                 };
 
                 var actor = system.ActorOf(
-                    Props.Create<RootActor>(respondUntyped, respondTyped));
+                    Props.Create<RootActor>(sendUntyped, sendTyped));
                 var clientCommandsConsumer = new EventingBasicConsumer(channel);
                 clientCommandsConsumer.Received += (model, ea) => 
                 {
                     var serialized = Encoding.UTF8.GetString(ea.Body);
-                    var mess = JsonSerializer.Deserialize<TypedMessage>(serialized, new  JsonSerializerOptions()
+                    var message = JsonSerializer.Deserialize<TypedMessage>(serialized, new  JsonSerializerOptions()
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
-                    actor.Tell(mess);
+                    actor.Tell(message);
                 };
                 channel.BasicConsume(
                     queue: "ClientCommands", 
@@ -67,22 +69,25 @@ namespace Some
         }
     }
 
+    delegate void SendUntyped(string channel, string message);
+    delegate void SendTyped(string channel, object message);
+
     class RootActor : ReceiveActor
     {
-        private Action<string> RespondUntyped { get; }
-        private Action<object> RespondTyped { get; }
+        private SendUntyped SendUntyped { get; }
+        private SendTyped SendTyped { get; }
 
         public RootActor(
-            Action<string> respondUntyped,
-            Action<object> respondTyped)
+            SendUntyped sendUntyped,
+            SendTyped sendTyped)
         {
-            this.RespondUntyped = respondUntyped;
-            this.RespondTyped = respondTyped;
+            this.SendUntyped = sendUntyped;
+            this.SendTyped = sendTyped;
 
             this.Receive<TypedMessage>(args => 
             {
                 System.Console.WriteLine("REAL" + args.Data);
-                this.RespondUntyped("whatever");
+                this.SendUntyped("CrawlCommands", "crawl");
             });
         }
     }

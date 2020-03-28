@@ -9,4 +9,10 @@ namespace Contracts
     {
         public string Data { get; set; }
     }
+
+    [Serializable]
+    public class CrawlCommand
+    {
+        
+    }
 }
