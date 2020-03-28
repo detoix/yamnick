@@ -20,21 +20,27 @@ namespace Some
             using(var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
-                SendUntyped sendUntyped = (chanell, message) =>
+                SendUntyped sendUntyped = (chanell, message, replyTo) =>
                 {
+                    var props = channel.CreateBasicProperties();
+                    if (!string.IsNullOrEmpty(replyTo))
+                        props.ReplyTo = replyTo;
                     channel.BasicPublish(
                         exchange: string.Empty,
                         routingKey: chanell,
-                        basicProperties: null,
+                        basicProperties: props,
                         body: Encoding.UTF8.GetBytes(message));
                 };
 
-                SendTyped sendTyped = (chanell, message) =>
+                SendTyped sendTyped = (chanell, message, replyTo) =>
                 {
+                    var props = channel.CreateBasicProperties();
+                    if (!string.IsNullOrEmpty(replyTo))
+                        props.ReplyTo = replyTo;
                     channel.BasicPublish(
                         exchange: string.Empty,
                         routingKey: chanell,
-                        basicProperties: null,
+                        basicProperties: props,
                         body: message.ToByteArray());
                 };
 
@@ -69,8 +75,8 @@ namespace Some
         }
     }
 
-    delegate void SendUntyped(string channel, string message);
-    delegate void SendTyped(string channel, object message);
+    delegate void SendUntyped(string channel, string message, string replyTo);
+    delegate void SendTyped(string channel, object message, string replyTo);
 
     class RootActor : ReceiveActor
     {
@@ -87,7 +93,10 @@ namespace Some
             this.Receive<TypedMessage>(args => 
             {
                 System.Console.WriteLine("REAL" + args.Data);
-                this.SendUntyped("CrawlCommands", "crawl");
+                this.SendUntyped(
+                    "crawl_queue", 
+                    "crawl", 
+                    "ResponsesToClient");
             });
         }
     }
