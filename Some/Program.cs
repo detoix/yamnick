@@ -93,10 +93,39 @@ namespace Some
             this.Receive<TypedMessage>(args => 
             {
                 System.Console.WriteLine("REAL" + args.Data);
+
+                var crawlRequest = new CrawlCommand()
+                {
+                    Visit = "https://www.money.pl/sekcja/koronawirus/",
+                    Spiders = new[]
+                    {
+                        new CrawlCommand()
+                        {
+                            Selector = "p.sc-1mh2gec-0",
+                            Tag = "extracted_nested"
+                        },
+                        new CrawlCommand()
+                        {
+                            Visit = "a.sc-17rdsii-2::attr(href)",
+                            Spiders = new[]
+                            {
+                                new CrawlCommand()
+                                {
+                                    Selector = "div.b300",
+                                    Tag = "found"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var message = JsonSerializer.Serialize(crawlRequest, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
                 this.SendUntyped(
-                    "crawl_queue", 
-                    "crawl", 
-                    "ResponsesToClient");
+                    "crawl_queue", message, "ResponsesToClient");
             });
         }
     }

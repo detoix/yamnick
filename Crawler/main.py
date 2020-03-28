@@ -5,18 +5,25 @@ from crawler.spiders.spider import *
 def callback(ch, method, props, body):
     print("[x] Received %r" % body)
 
-    with open('input.json') as json_file:
-        payload = json.load(json_file)
+    results_file = RecursiveSpider.custom_settings['FEED_URI']
+    if os.path.exists(results_file):
+        os.remove(results_file)
+
+    payload = json.loads(body)
     process = CrawlerProcess()
     process.crawl(RecursiveSpider, payload)
     process.start()
 
-    with open('data.json') as json_file:
-        channel.basic_publish(exchange='', routing_key=props.reply_to, body=json_file.read())
-    print("[x] Processed %r" % body)
+    with open(results_file) as json_file:
+        content = json_file.read()
+        print("[x] Pushing ", content, " to ", props.reply_to)
+        channel.basic_publish(exchange='', routing_key=props.reply_to, body=content)
+        
+    print("[x] Restarting crawler")
+    os.execl(sys.executable, sys.executable, *sys.argv)
 
 if __name__ == '__main__':
-    url = os.environ.get('CLOUDAMQP_URL', 'amqp://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk')
+    url = sys.argv[1]
     params = pika.URLParameters(url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()

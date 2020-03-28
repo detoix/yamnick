@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 class RecursiveSpider(scrapy.Spider):
     name = 'recursive'
     custom_settings = {
-        'FEED_URI': 'data.json',
+        'FEED_URI': 'result.json',
         'FEED_FORMAT': 'json'
     }
 
@@ -22,14 +22,14 @@ class RecursiveSpider(scrapy.Spider):
                 yield result
 
     def parse(self, response):
-        if 'selector' in self.input and 'tag' in self.input:
+        if self.input['selector'] is not None and self.input['tag'] is not None:
             result = {
                 'from': response.url
             }
             for extracted in response.css(self.input['selector']).extract():
                 result[self.input['tag']] = BeautifulSoup(extracted).get_text().strip() 
             yield result
-        elif 'visit' in self.input:
+        elif self.input['visit'] is not None:
             for html in response.css(self.input['visit']).extract():
                 visit = re.search('^.+?[^\/:](?=[?\/]|$)', response.url).group(0)
                 yield SplashRequest(visit + html.replace(visit, ''), self.run_nested_spiders)
