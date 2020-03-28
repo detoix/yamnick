@@ -11,15 +11,15 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
     if (error0) {
         throw error0;
     }
-
-    connection.createChannel(function(error1, channel) {
-        if (error1) {
-            throw error1;
-        }
-
-        io.on("connection", socket => {
-            console.log("New client connected");
+    
+    io.on("connection", socket => {
+        console.log("New client connected");
         
+        connection.createChannel(function(error1, channel) {
+            if (error1) {
+                throw error1;
+            }
+
             socket.on("query", (data)=>{
                 console.log("Server received query of", data)
                 channel.sendToQueue('ClientCommands', Buffer.from(data));
@@ -27,12 +27,15 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
 
             channel.consume('ResponsesToClient', function(msg) {
                 let message = msg.content.toString()
-                console.log("Server received response of", message);
-                socket.emit("response", message);
+                console.log("Server received response of length:", message.length);
+                socket.emit("response", "Received response of length: " + message.length)
             }, { noAck: true });
-        
-            //A special namespace "disconnect" for when a client disconnects
-            socket.on("disconnect", () => console.log("Client disconnected"));
+            
+            socket.on("disconnect", () => 
+            {
+                channel.close()
+                console.log("Client disconnected")
+            });
         });
     });
 });
