@@ -54,6 +54,7 @@ namespace Some
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
+                    message.ReplyTo = ea.BasicProperties.ReplyTo;
                     actor.Tell(message);
                 };
                 channel.BasicConsume(
@@ -124,8 +125,7 @@ namespace Some
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                this.SendUntyped(
-                    "crawl_queue", message, "ResponsesToClient");
+                this.SendUntyped("crawl_queue", message, args.ReplyTo);
             });
         }
     }

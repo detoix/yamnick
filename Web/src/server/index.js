@@ -20,17 +20,23 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 throw error1;
             }
 
-            socket.on("query", (data)=>{
-                console.log("Server received query of", data)
-                channel.sendToQueue('ClientCommands', Buffer.from(data));
+            channel.assertQueue('', { exclusive: true }, function(error2, q) {
+                if (error2) {
+                  throw error2;
+                }
+
+                socket.on("query", (data)=>{
+                    console.log("Server received query of", data)
+                    channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: q.queue });
+                });
+
+                channel.consume(q.queue, function(msg) {
+                    let message = msg.content.toString()
+                    console.log("Server received response of length:", message.length);
+                    socket.emit("response", "Received response of length: " + message.length)
+                }, { noAck: true });
             });
 
-            channel.consume('ResponsesToClient', function(msg) {
-                let message = msg.content.toString()
-                console.log("Server received response of length:", message.length);
-                socket.emit("response", "Received response of length: " + message.length)
-            }, { noAck: true });
-            
             socket.on("disconnect", () => 
             {
                 channel.close()

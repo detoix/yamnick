@@ -8,6 +8,7 @@ namespace Contracts
     public class TypedMessage
     {
         public string Data { get; set; }
+        public string ReplyTo { get; set; }
     }
 
     [Serializable]
