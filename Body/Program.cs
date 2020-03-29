@@ -9,7 +9,7 @@ namespace Body
     {
         static void Main(string[] args)
         {
-            var message = new TypedMessage() { Data = "dupa1" };
+            var message = new TypedMessage();
             var factory = new ConnectionFactory() 
             { 
                 Uri = new Uri(args[0])
