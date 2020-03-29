@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import socketIOClient from "socket.io-client";
+import { useAuth0 } from "../utils/react-auth0-spa";
+import NavBar from "./NavBar";
 
 export class Home extends Component {
   displayName = Home.name
@@ -72,6 +74,7 @@ export class Home extends Component {
   render() {
     return (
       <div>
+        <NavBar />
         <h1>Hello, world!</h1>
             <button onClick={this.tell}>Increment</button>
             <button onClick={this.load}>Load</button>
