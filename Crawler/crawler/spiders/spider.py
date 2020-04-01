@@ -22,11 +22,11 @@ class RecursiveSpider(scrapy.Spider):
                 yield result
 
     def parse(self, response):
-        if self.input['selector'] is not None and self.input['tag'] is not None:
+        if self.input['selector'] is not None:
             for extracted in response.css(self.input['selector']).extract():
                 result = {}
-                result['from'] = response.url
-                result[self.input['tag']] = BeautifulSoup(extracted).get_text().strip() 
+                result['on'] = response.url
+                result['found'] = BeautifulSoup(extracted).get_text().strip() 
                 yield result
         elif self.input['visit'] is not None:
             for html in response.css(self.input['visit']).extract():

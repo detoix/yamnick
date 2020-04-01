@@ -15,9 +15,15 @@ def callback(ch, method, props, body):
     process.start()
 
     with open(results_file) as json_file:
-        content = json_file.read()
-        print("[x] Pushing ", content, " to ", props.reply_to)
-        channel.basic_publish(exchange='', routing_key=props.reply_to, body=content)
+        file_content = json_file.read()
+        results = {}
+        results['results'] = json.loads(file_content)
+        content = {}
+        content['crawlResults'] = results
+        serialized = json.dumps(content)
+        print("[x] Pushing ", serialized, " to ", props.reply_to, "and for saving...")
+        channel.basic_publish(exchange='', routing_key=props.reply_to, body=serialized)
+        channel.basic_publish(exchange='', routing_key='ClientCommands', body=serialized)
         
     print("[x] Restarting crawler")
     os.execl(sys.executable, sys.executable, *sys.argv)

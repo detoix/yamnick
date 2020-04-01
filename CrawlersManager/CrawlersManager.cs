@@ -32,6 +32,12 @@ namespace CrawlersManager
                     args.CrawlCommand.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.CrawlCommand);
                 }
+                else if (args.CrawlResults != null)
+                {
+                    System.Console.WriteLine($"Received {nameof(args.CrawlResults)} with reply to {args.ReplyTo}, forwarding to self...");
+                    args.CrawlResults.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.CrawlResults);
+                }
             });
 
             this.Receive<CrawlCommand>(args => 
@@ -44,6 +50,11 @@ namespace CrawlersManager
                 });
 
                 this.SendUntyped("crawl_queue", message, args.ReplyTo);
+            });
+
+            this.Receive<CrawlResults>(args =>
+            {
+                this.PersistenceManager.Forward(args);
             });
         }
     }

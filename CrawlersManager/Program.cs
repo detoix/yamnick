@@ -54,11 +54,14 @@ namespace CrawlersManager
                 clientCommandsConsumer.Received += (model, ea) => 
                 {
                     var serialized = Encoding.UTF8.GetString(ea.Body);
+                    System.Console.WriteLine(serialized);
                     var message = JsonSerializer.Deserialize<TypedMessage>(serialized, new  JsonSerializerOptions()
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
+                    System.Console.WriteLine(message);
                     message.ReplyTo = ea.BasicProperties.ReplyTo;
+                    System.Console.WriteLine(message.CrawlResults);
                     actor.Tell(message);
                 };
                 channel.BasicConsume(

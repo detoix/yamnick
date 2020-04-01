@@ -30,7 +30,6 @@ export class Home extends Component {
         [
           {
             selector: "p.sc-1mh2gec-0",
-            tag: "extracted_nested"
           },
           {
             visit: "a.sc-17rdsii-2::attr(href)",
@@ -38,7 +37,6 @@ export class Home extends Component {
             [
               {
                 selector: "div.b300",
-                tag: "found"
               },
             ]
           }
@@ -63,7 +61,6 @@ export class Home extends Component {
         [
           {
             selector: this.state.selector,
-            tag: "data"
           }
         ]
       }

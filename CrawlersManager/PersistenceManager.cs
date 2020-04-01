@@ -1,5 +1,6 @@
 using System.Linq;
 using Akka.Actor;
+using Contracts;
 using Marten;
 
 namespace CrawlersManager
@@ -13,23 +14,17 @@ namespace CrawlersManager
         {
             this.Store = store;
 
-            this.Receive<bool>(args => 
+            this.Receive<CrawlResults>(args => 
             {
-                // using (var session = store.LightweightSession())
-                // {
-                //     var user = new Foo() { Name = "Han" };
-                //     session.Store(user);
-                //     session.SaveChanges();
-                // }
+                System.Console.WriteLine($"Persisting {args}...");
+
+                using (var session = store.LightweightSession())
+                {
+                    session.Store(args);
+                    session.SaveChanges();
+                }
             });
         }
-
-        public class Foo
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
         
         public static string ValidConnectionStringFrom(string connectionString)
         {
@@ -50,6 +45,5 @@ namespace CrawlersManager
                 return $"Server={server};Port={port};Database={database};User Id={user};Password={pass};sslmode=Require;Trust Server Certificate=true";
             }
         }
-
     }
 }
