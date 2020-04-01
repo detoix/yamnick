@@ -6,7 +6,7 @@ using Contracts;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Some
+namespace CrawlersManager
 {
     class Program
     {
