@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom'   
-import socketIOClient from "socket.io-client";
-import NavBar from "./NavBar";
+import { useAuth0 } from "../utils/react-auth0-spa";
 
-const Home = ({ location }) => {
-  const [socket, setSocket] = useState(() => socketIOClient(location))
+const Home = ({socket}) => {
   const [visit, setVisit] = useState('')
   const [selector, setSelector] = useState('')
+  const { loading, user } = useAuth0();
 
   useEffect(() => {
     socket.on("event", data => console.log(data))
@@ -55,12 +54,23 @@ const Home = ({ location }) => {
     }
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
-  
+
   return (
     <div>
-      <NavBar />
+      
       <h1>Hello, world!</h1>
           <button onClick={tell}>Increment</button>
+
+
+
+
+                  {!(loading || !user) &&
+                
+                  <p>{user.name}
+                      {user.email}</p>}
+
+
+
           <form onSubmit={handleSubmit}>
             <label>
               Visit:
