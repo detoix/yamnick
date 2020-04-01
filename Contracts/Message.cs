@@ -23,7 +23,6 @@ namespace Contracts
     {
         public string Visit { get; set; }
         public string Selector { get; set; }
-        public string Tag { get; set; }
         public CrawlCommand[] Spiders { get; set; }
     }
 

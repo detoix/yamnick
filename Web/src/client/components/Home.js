@@ -1,27 +1,19 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom'   
 import socketIOClient from "socket.io-client";
-import { useAuth0 } from "../utils/react-auth0-spa";
 import NavBar from "./NavBar";
 
-export class Home extends Component {
-  displayName = Home.name
+const Home = ({ location }) => {
+  const [socket, setSocket] = useState(() => socketIOClient(location))
+  const [visit, setVisit] = useState('')
+  const [selector, setSelector] = useState('')
 
-  constructor(props) {
-      super(props)
-      this.state = {
-        socket: socketIOClient(this.props.location),
-        visit: '',
-        selector: ''
-      }
-      this.handleSubmit = this.handleSubmit.bind(this);
-      this.tell = this.tell.bind(this)
-      this.receive = this.receive.bind(this)
-      this.state.socket.on("response_received", data => this.receive(data))
-      this.state.socket.on("event", data => this.receive(data))
-      
-  }
+  useEffect(() => {
+    socket.on("event", data => console.log(data))
+    socket.on("response_received", data => console.log(data))
+  });
 
-  tell() {
+  const tell = () => {
     let crawlRequest = {
       crawlCommand: 
       {
@@ -43,52 +35,45 @@ export class Home extends Component {
         ]
       }
     }
-    this.state.socket.emit("query_issued", JSON.stringify(crawlRequest))
+    socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
-  receive(data) {
-    console.log(data)
-  }
-
-  handleSubmit(event) {
+  const handleSubmit = event => {
     event.preventDefault();
 
     let crawlRequest = {
       crawlCommand: 
       {
-        visit: this.state.visit,
+        visit: visit,
         spiders: 
         [
           {
-            selector: this.state.selector,
+            selector: selector,
           }
         ]
       }
     }
-    this.state.socket.emit("query_issued", JSON.stringify(crawlRequest))
+    socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
   
-  render() {
-    return (
-      <div>
-        <NavBar />
-        <h1>Hello, world!</h1>
-            <button onClick={this.tell}>Increment</button>
-            <button onClick={this.load}>Load</button>
-            <button onClick={this.sd}>SD</button>
-            <button onClick={this.wpiszOkragWKwadrawt}>wpiszOkragWKwadrawt</button>
-            <form onSubmit={this.handleSubmit}>
-              <label>
-                Visit:
-                <input type="text" value={this.state.visit} onChange={e => this.setState({visit: e.target.value})} />
-              </label>
-              <label>
-                Select:
-                <input type="text" value={this.state.selector} onChange={e => this.setState({selector: e.target.value})} />
-              </label>
-              <input type="submit" value="Submit" />
-            </form>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <NavBar />
+      <h1>Hello, world!</h1>
+          <button onClick={tell}>Increment</button>
+          <form onSubmit={handleSubmit}>
+            <label>
+              Visit:
+              <input type="text" value={visit} onChange={e => setVisit(e.target.value)} />
+            </label>
+            <label>
+              Select:
+              <input type="text" value={selector} onChange={e => setSelector(e.target.value)} />
+            </label>
+            <input type="submit" value="Submit" />
+          </form>
+    </div>
+  );
 }
+
+export default withRouter(Home)
