@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using Akka.Actor;
 using Contracts;
+using Marten;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -12,12 +14,12 @@ namespace CrawlersManager
     {
         static void Main(string[] args)
         {
-            var factory = new ConnectionFactory() 
-            {
-                Uri = new Uri(args[0])
-            };
-            using(var connection = factory.CreateConnection())
-            using(var channel = connection.CreateModel())
+            System.Console.WriteLine(
+                $"Starting up with args of: {string.Join(" ", args)}");
+
+            using (var store = DocumentStore.For(PersistenceManager.ValidConnectionStringFrom(args[0])))
+            using (var connection = new RabbitMQ.Client.ConnectionFactory() { Uri = new Uri(args[1]) }.CreateConnection())
+            using (var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
                 SendUntyped sendUntyped = (chanell, message, replyTo) =>
@@ -44,8 +46,10 @@ namespace CrawlersManager
                         body: message.ToByteArray());
                 };
 
+                var persistenceManager = system.ActorOf(
+                    Props.Create<PersistenceManager>(store));
                 var actor = system.ActorOf(
-                    Props.Create<RootActor>(sendUntyped, sendTyped));
+                    Props.Create<CrawlersManager>(persistenceManager, sendUntyped, sendTyped));
                 var clientCommandsConsumer = new EventingBasicConsumer(channel);
                 clientCommandsConsumer.Received += (model, ea) => 
                 {
@@ -73,45 +77,6 @@ namespace CrawlersManager
                     
                 } while (true);
             }
-        }
-    }
-
-    delegate void SendUntyped(string channel, string message, string replyTo);
-    delegate void SendTyped(string channel, object message, string replyTo);
-
-    class RootActor : ReceiveActor
-    {
-        private SendUntyped SendUntyped { get; }
-        private SendTyped SendTyped { get; }
-
-        public RootActor(
-            SendUntyped sendUntyped,
-            SendTyped sendTyped)
-        {
-            this.SendUntyped = sendUntyped;
-            this.SendTyped = sendTyped;
-
-            this.Receive<TypedMessage>(args =>
-            {
-                if (args.CrawlCommand != null)
-                {
-                    System.Console.WriteLine($"Received {nameof(args.CrawlCommand)} with reply to {args.ReplyTo}, forwarding to self...");
-                    args.CrawlCommand.ReplyTo = args.ReplyTo;
-                    this.Self.Forward(args.CrawlCommand);
-                }
-            });
-
-            this.Receive<CrawlCommand>(args => 
-            {
-                System.Console.WriteLine($"Processing {args}");
-
-                var message = JsonSerializer.Serialize(args, new JsonSerializerOptions()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-
-                this.SendUntyped("crawl_queue", message, args.ReplyTo);
-            });
         }
     }
 }
