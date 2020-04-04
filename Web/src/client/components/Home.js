@@ -3,18 +3,20 @@ import { withRouter } from 'react-router-dom'
 import { useAuth0 } from "../utils/react-auth0-spa";
 
 const Home = ({socket}) => {
+  const [queriesData, setQueriesData] = useState(null)
   const [visit, setVisit] = useState('')
   const [selector, setSelector] = useState('')
   const { loading, user } = useAuth0();
 
   useEffect(() => {
     socket
-      .on("event", data => console.log(data))
-      .on("response_received", data => console.log(data))
+      .on("response_received", data => {
+        setQueriesData(JSON.parse(data))
+      })
       .emit("query_issued", JSON.stringify({
         queryForUser: { }
       }))
-  });
+  }, []);
 
   const tell = () => {
     let crawlRequest = {
@@ -87,6 +89,13 @@ const Home = ({socket}) => {
             </label>
             <input type="submit" value="Submit" />
           </form>
+
+          {queriesData &&
+                
+                <p>{queriesData.replyTo}</p>
+                
+          }
+
     </div>
   );
 }

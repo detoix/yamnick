@@ -33,7 +33,6 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 channel.consume(q.queue, function(msg) {
                     let message = msg.content.toString()
                     console.log("Server received response of length:", message.length);
-                    socket.broadcast.emit("event", "something happend")
                     socket.emit("response_received", message)
                 }, { noAck: true });
 
@@ -41,6 +40,9 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                     console.log("Server received query of", data)
                     channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: socket.decoded_token.sub });
                 });
+
+                socket.emit("server_ready")
+                console.log("Listening for queries...")
             });
             
             socket.on("disconnect", () => 
@@ -48,8 +50,6 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 channel.close()
                 console.log("Client disconnected")
             });
-
-            socket.emit("server_ready")
         });
     });
 });
