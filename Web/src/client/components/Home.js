@@ -8,8 +8,9 @@ const Home = ({socket}) => {
   const { loading, user } = useAuth0();
 
   useEffect(() => {
-    socket.on("event", data => console.log(data))
-    socket.on("response_received", data => console.log(data))
+    socket
+      .on("event", data => console.log(data))
+      .on("response_received", data => console.log(data))
   });
 
   const tell = () => {

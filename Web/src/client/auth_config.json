@@ -1,4 +1,5 @@
 {
     "domain": "detoix.eu.auth0.com",
-    "clientId": "zGsz90phUd8nvKnQkDhiKyiKq5phSepD"
+    "clientId": "TjELIr1Z0KFbvJnZakGrQygwewF6eXqV",
+    "audience": "crawling-system-api"
 }

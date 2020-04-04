@@ -1,7 +1,8 @@
 const express = require('express');
 const http = require("http");
 const socketIo = require("socket.io");
-var amqp = require('amqplib/callback_api');
+const socketioJwt   = require('socketio-jwt');
+const amqp = require('amqplib/callback_api');
 
 const app = express();
 const server = http.createServer(app);
@@ -11,9 +12,13 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
     if (error0) {
         throw error0;
     }
-    
-    io.on("connection", socket => {
-        console.log("New client connected");
+
+    io.on('connection', socketioJwt.authorize({
+        secret: process.env.AUTH0_CLIENT_SECRET,
+        timeout: 5000 // 5 seconds to send the authentication message
+    }))
+    .on("authenticated", socket => {
+        console.log("New client connected as", socket.decoded_token.sub);
         
         connection.createChannel(function(error1, channel) {
             if (error1) {
@@ -25,17 +30,17 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                   throw error2;
                 }
 
-                socket.on("query_issued", (data) => {
-                    console.log("Server received query of", data)
-                    channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: q.queue });
-                });
-
                 channel.consume(q.queue, function(msg) {
                     let message = msg.content.toString()
                     console.log("Server received response of length:", message.length);
                     socket.broadcast.emit("event", "something happend")
                     socket.emit("response_received", message)
                 }, { noAck: true });
+
+                socket.on("query_issued", (data) => {
+                    console.log("Server received query of", data)
+                    channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: q.queue });
+                });
             });
 
             socket.on("disconnect", () => 
