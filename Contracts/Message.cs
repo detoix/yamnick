@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Contracts
 {
@@ -7,6 +8,12 @@ namespace Contracts
     {
         public int Id { get; set; }
         public string ReplyTo { get; set; }
+    }
+
+    [Serializable]
+    public class User : Message
+    {
+        public List<CrawlCommand> QueriesWithResults { get; set; }
     }
 
     [Serializable]
@@ -22,6 +29,7 @@ namespace Contracts
         public string Visit { get; set; }
         public string Selector { get; set; }
         public CrawlCommand[] Spiders { get; set; }
+        public List<CrawlResults> CrawlResults { get; set; }
     }
 
     [Serializable]

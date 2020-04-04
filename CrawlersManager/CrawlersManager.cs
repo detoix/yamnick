@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Contracts;
+using CrawlersManager.Events;
 using System.Text.Json;
 
 namespace CrawlersManager
@@ -22,19 +23,17 @@ namespace CrawlersManager
             this.SendUntyped = sendUntyped;
             this.SendTyped = sendTyped;
 
-            this.PersistenceManager.Tell(true);
-
             this.Receive<TypedMessage>(args =>
             {
+                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
                 if (args.CrawlCommand != null)
                 {
-                    System.Console.WriteLine($"Received {nameof(args.CrawlCommand)} with reply to {args.ReplyTo}, forwarding to self...");
                     args.CrawlCommand.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.CrawlCommand);
                 }
                 else if (args.CrawlResults != null)
                 {
-                    System.Console.WriteLine($"Received {nameof(args.CrawlResults)} with reply to {args.ReplyTo}, forwarding to self...");
                     args.CrawlResults.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.CrawlResults);
                 }
@@ -42,19 +41,40 @@ namespace CrawlersManager
 
             this.Receive<CrawlCommand>(args => 
             {
-                System.Console.WriteLine($"Processing {args}");
+                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                this.PersistenceManager.Tell(args);
+            });
+
+            this.Receive<CrawlCommandPersisted>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.CrawlCommand.Id} by {args.CrawlCommand.ReplyTo}");
+
+                var message = JsonSerializer.Serialize(args.CrawlCommand, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                this.SendUntyped("crawl_queue", message, args.CrawlCommand.ReplyTo);
+            });
+
+            this.Receive<CrawlResults>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+                
+                this.PersistenceManager.Tell(args);
+            });
+
+            this.Receive<User>(args => 
+            {
+                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
 
                 var message = JsonSerializer.Serialize(args, new JsonSerializerOptions()
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                this.SendUntyped("crawl_queue", message, args.ReplyTo);
-            });
-
-            this.Receive<CrawlResults>(args =>
-            {
-                this.PersistenceManager.Forward(args);
+                this.SendUntyped(args.ReplyTo, message, string.Empty);
             });
         }
     }

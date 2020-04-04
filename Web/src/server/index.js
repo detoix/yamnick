@@ -25,7 +25,7 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 throw error1;
             }
 
-            channel.assertQueue('', { exclusive: true }, function(error2, q) {
+            channel.assertQueue(socket.decoded_token.sub, { exclusive: true }, function(error2, q) {
                 if (error2) {
                   throw error2;
                 }
@@ -39,7 +39,7 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
 
                 socket.on("query_issued", (data) => {
                     console.log("Server received query of", data)
-                    channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: q.queue });
+                    channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: socket.decoded_token.sub });
                 });
             });
 

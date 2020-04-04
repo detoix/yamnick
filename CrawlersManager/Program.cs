@@ -59,9 +59,7 @@ namespace CrawlersManager
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
-                    System.Console.WriteLine(message);
                     message.ReplyTo = ea.BasicProperties.ReplyTo;
-                    System.Console.WriteLine(message.CrawlResults);
                     actor.Tell(message);
                 };
                 channel.BasicConsume(
