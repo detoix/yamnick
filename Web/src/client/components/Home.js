@@ -67,7 +67,7 @@ const Home = ({socket}) => {
                   {!(loading || !user) &&
                 
                   <p>{user.name}
-                      {user.email}</p>}
+                      {user.email} {user.sub}</p>}
 
 
 

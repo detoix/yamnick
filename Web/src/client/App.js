@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
+import history from "./utils/history";
 import Home from './components/Home';
 import NavBar from './components/NavBar';
 import './app.css';
@@ -13,7 +14,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Router>
+      <Router history={history}>
         <NavBar />
         <Switch>
           <Route exact path='/' render={(props) => <Home {...props} socket={this.state.socket} />} />
