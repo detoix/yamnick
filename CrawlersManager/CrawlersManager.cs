@@ -8,13 +8,13 @@ namespace CrawlersManager
     delegate void SendUntyped(string channel, string message, string replyTo);
     delegate void SendTyped(string channel, object message, string replyTo);
 
-    class CrawlersManager : ReceiveActor
+    class CrawlersCoordinator : ReceiveActor
     {
         private IActorRef PersistenceManager { get; }
         private SendUntyped SendUntyped { get; }
         private SendTyped SendTyped { get; }
 
-        public CrawlersManager(
+        public CrawlersCoordinator(
             IActorRef persistenceManager,
             SendUntyped sendUntyped,
             SendTyped sendTyped)
@@ -25,7 +25,7 @@ namespace CrawlersManager
 
             this.Receive<TypedMessage>(args =>
             {
-                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
 
                 if (args.CrawlCommand != null)
                 {
@@ -37,18 +37,30 @@ namespace CrawlersManager
                     args.CrawlResults.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.CrawlResults);
                 }
+                else if (args.QueryForUser != null)
+                {
+                    args.QueryForUser.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.QueryForUser);
+                }
+            });
+
+            this.Receive<QueryForUser>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+                
+                this.PersistenceManager.Tell(args);
             });
 
             this.Receive<CrawlCommand>(args => 
             {
-                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
 
                 this.PersistenceManager.Tell(args);
             });
 
             this.Receive<CrawlCommandPersisted>(args =>
             {
-                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.CrawlCommand.Id} by {args.CrawlCommand.ReplyTo}");
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.CrawlCommand.Id} by {args.CrawlCommand.ReplyTo}");
 
                 var message = JsonSerializer.Serialize(args.CrawlCommand, new JsonSerializerOptions()
                 {
@@ -60,14 +72,14 @@ namespace CrawlersManager
 
             this.Receive<CrawlResults>(args =>
             {
-                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
                 
                 this.PersistenceManager.Tell(args);
             });
 
             this.Receive<User>(args => 
             {
-                System.Console.WriteLine($"{nameof(CrawlersManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
 
                 var message = JsonSerializer.Serialize(args, new JsonSerializerOptions()
                 {

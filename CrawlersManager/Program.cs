@@ -49,7 +49,7 @@ namespace CrawlersManager
                 var persistenceManager = system.ActorOf(
                     Props.Create<PersistenceManager>(store));
                 var actor = system.ActorOf(
-                    Props.Create<CrawlersManager>(persistenceManager, sendUntyped, sendTyped));
+                    Props.Create<CrawlersCoordinator>(persistenceManager, sendUntyped, sendTyped));
                 var clientCommandsConsumer = new EventingBasicConsumer(channel);
                 clientCommandsConsumer.Received += (model, ea) => 
                 {

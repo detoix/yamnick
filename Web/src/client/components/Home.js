@@ -11,6 +11,9 @@ const Home = ({socket}) => {
     socket
       .on("event", data => console.log(data))
       .on("response_received", data => console.log(data))
+      .emit("query_issued", JSON.stringify({
+        queryForUser: { }
+      }))
   });
 
   const tell = () => {
@@ -35,6 +38,7 @@ const Home = ({socket}) => {
         ]
       }
     }
+
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 

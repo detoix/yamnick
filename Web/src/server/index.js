@@ -42,12 +42,14 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                     channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: socket.decoded_token.sub });
                 });
             });
-
+            
             socket.on("disconnect", () => 
             {
                 channel.close()
                 console.log("Client disconnected")
             });
+
+            socket.emit("server_ready")
         });
     });
 });

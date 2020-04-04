@@ -8,18 +8,27 @@ import NavBar from './components/NavBar';
 import './app.css';
 
 const App = () => {
-  const { getTokenSilently, loading } = useAuth0();
+  const { isAuthenticated, getTokenSilently, loading } = useAuth0();
+  const [ready, setReady] = useState(false)
   const [socket, setSocket] = useState(
     socketIOClient(window.location.origin))
 
   useEffect(() => {
     const authorize = async () => {
-      const token = await getTokenSilently();
+      if (!isAuthenticated)
+      {
+        setReady(true)
+        return
+      }
 
+      const token = await getTokenSilently();
       socket
         .emit('authenticate', { token: token })
+        .on('server_ready', () => {
+          setReady(true)
+        })
         .on('authenticated', () => {
-          //do other things
+          
         })
         .on('unauthorized', (msg) => {
           console.log(`unauthorized: ${JSON.stringify(msg.data)}`);
@@ -29,6 +38,11 @@ const App = () => {
       authorize();
     }
   }, [loading, getTokenSilently]);
+
+  if (!ready)
+  {
+    return <div>Loading...</div> 
+  }
 
   return (
     <Router history={history}>

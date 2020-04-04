@@ -19,6 +19,7 @@ namespace Contracts
     [Serializable]
     public class TypedMessage : Message
     {
+        public QueryForUser QueryForUser { get; set; }
         public CrawlCommand CrawlCommand { get; set; }
         public CrawlResults CrawlResults { get; set; }
     }
@@ -43,5 +44,11 @@ namespace Contracts
     {
         public string On { get; set; }
         public string Found { get; set; }
+    }
+
+    [Serializable]
+    public class QueryForUser : Message
+    {
+        
     }
 }

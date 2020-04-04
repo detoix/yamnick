@@ -16,6 +16,30 @@ namespace CrawlersManager
         {
             this.Store = store;
 
+            this.Receive<QueryForUser>(args =>
+            {
+                System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                using (var session = store.OpenSession())
+                {
+                    var existingUser = session
+                        .Query<User>()
+                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .SingleOrDefault();
+
+                    if (existingUser is null)
+                    {
+                        System.Console.WriteLine($"User of {args.ReplyTo} not found");
+                    }
+                    else
+                    {
+                        System.Console.WriteLine($"User of {args.ReplyTo} found, forwarding...");
+
+                        this.Sender.Tell(existingUser);
+                    }
+                }
+            });
+
             this.Receive<CrawlCommand>(args => 
             {
                 System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
