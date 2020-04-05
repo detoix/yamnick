@@ -77,7 +77,10 @@ namespace CrawlersManager
                         {
                             System.Console.WriteLine($"Creating query of {args.Id} by user of {args.ReplyTo}");
 
-                            args.Id = existingUser.QueriesWithResults.Max(e => e.Id) + 1;
+                            args.Id = existingUser.QueriesWithResults
+                                .Select(e => e.Id)
+                                .DefaultIfEmpty()
+                                .Max() + 1;
                             args.CrawlResults = new List<CrawlResults>();
                             existingUser.QueriesWithResults.Add(args);
 
@@ -127,6 +130,10 @@ namespace CrawlersManager
                         {
                             System.Console.WriteLine($"Updating query of {args.Id} by user of {args.ReplyTo}");
 
+                            args.Id = existingQuery.CrawlResults
+                                .Select(e => e.Id)
+                                .DefaultIfEmpty()
+                                .Max() + 1;
                             existingQuery.CrawlResults.Add(args);
 
                             session.Store(existingUser);
