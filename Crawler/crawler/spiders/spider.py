@@ -11,20 +11,27 @@ class RecursiveSpider(scrapy.Spider):
     }
 
     def __init__(self, input):
-        self.input = input
-        self.base_url = re.search('^.+?[^\/:](?=[?\/]|$)', input['startUrl']).group(0)
+        self.startUrl = input['startUrl']
+        self.collect = input['collect']
+        self.follow = input['follow']
+        self.base_url = re.search('^.+?[^\/:](?=[?\/]|$)', self.startUrl).group(0)
 
     def start_requests(self):
-        yield SplashRequest(self.input['startUrl'], self.go)
+        if self.startUrl:
+            yield SplashRequest(self.startUrl, self.go)
 
     def go(self, response):
-        for selector in self.input['collect']:
-            for extracted in response.css(selector).extract():
-                result = {}
-                result['on'] = response.url
-                result['found'] = BeautifulSoup(extracted).get_text().strip() 
-                yield result
+        if self.collect:
+            for selector in self.collect:
+                if selector:
+                    for extracted in response.css(selector).extract():
+                        result = {}
+                        result['on'] = response.url
+                        result['found'] = BeautifulSoup(extracted).get_text().strip() 
+                        yield result
 
-        for selector in self.input['follow']:
-            for extracted in response.css(selector + '::attr(href)').extract():
-                yield SplashRequest(self.base_url + extracted.replace(self.base_url, ''), self.go)
+        if self.follow:
+            for selector in self.follow:
+                if selector:
+                    for extracted in response.css(selector + '::attr(href)').extract():
+                        yield SplashRequest(self.base_url + extracted.replace(self.base_url, ''), self.go)

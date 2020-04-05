@@ -14,20 +14,22 @@ def callback(ch, method, props, body):
     process.crawl(RecursiveSpider, payload)
     process.start()
 
-    with open(results_file) as json_file:
-        file_content = json_file.read()
-        results = {}
-        results['id'] = payload['id']
-        results['results'] = json.loads(file_content)
-        content = {}
-        content['crawlResults'] = results
-        serialized = json.dumps(content)
-        print("[x] Pushing ", serialized, " back to caller...")
-        channel.basic_publish(
-            exchange='', 
-            routing_key='ClientCommands', 
-            body=serialized, 
-            properties=pika.BasicProperties(reply_to=props.reply_to))
+    if (os.path.exists(results_file)):
+        with open(results_file) as json_file:
+            file_content = json_file.read()
+            if file_content:
+                results = {}
+                results['id'] = payload['id']
+                results['results'] = json.loads(file_content)
+                content = {}
+                content['crawlResults'] = results
+                serialized = json.dumps(content)
+                print("[x] Pushing ", serialized, " back to caller...")
+                channel.basic_publish(
+                    exchange='', 
+                    routing_key='ClientCommands', 
+                    body=serialized, 
+                    properties=pika.BasicProperties(reply_to=props.reply_to))
         
     print("[x] Restarting crawler")
     os.execl(sys.executable, sys.executable, *sys.argv)
