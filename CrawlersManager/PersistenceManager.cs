@@ -15,6 +15,7 @@ namespace CrawlersManager
             IDocumentStore store)
         {
             this.Store = store;
+            this.EnsureDatabaseValid();
 
             this.Receive<QueryForUser>(args =>
             {
@@ -144,6 +145,15 @@ namespace CrawlersManager
                     }
                 }
             });
+        }
+
+        private void EnsureDatabaseValid()
+        {
+            using (var session = this.Store.OpenSession())
+            {
+                session.Store<User>();
+                session.SaveChanges();
+            }
         }
         
         public static string ValidConnectionStringFrom(string connectionString)

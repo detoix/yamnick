@@ -4,9 +4,9 @@ import { useAuth0 } from "../utils/react-auth0-spa";
 
 const Home = ({socket}) => {
   const [queriesData, setQueriesData] = useState(null)
-  const [startUrl, setStartUrl] = useState('')
-  const [follow, setFollow] = useState('')
-  const [collect, setCollect] = useState('')
+  const [startUrl, setStartUrl] = useState('https://www.bankier.pl/wiadomosc/95')
+  const [follow, setFollow] = useState('a.next.btn, span.entry-title a')
+  const [collect, setCollect] = useState('span.entry-title, span.lead')
   const { loading, user } = useAuth0();
 
   useEffect(() => {
@@ -19,19 +19,6 @@ const Home = ({socket}) => {
       }))
   }, []);
 
-  const tell = () => {
-    let crawlRequest = {
-      crawlCommand: 
-      {
-        startUrl: "https://www.bankier.pl/wiadomosc/95",
-        follow: ['a.next.btn', 'span.entry-title a'],
-        collect: ['span.entry-title', 'span.lead']
-      }
-    }
-
-    socket.emit("query_issued", JSON.stringify(crawlRequest))
-  }
-
   const handleSubmit = event => {
     event.preventDefault();
 
@@ -39,10 +26,11 @@ const Home = ({socket}) => {
       crawlCommand: 
       {
         startUrl: startUrl,
-        follow: follow,
-        collect: collect
+        follow: follow.split(','),
+        collect: collect.split(',')
       }
     }
+
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
@@ -62,8 +50,6 @@ const Home = ({socket}) => {
     <div>
       {!(loading || !user) && <h1>Hello, {user.name}!</h1>}
 
-      <button onClick={tell}>Run default crawl</button> 
-
       <form onSubmit={handleSubmit}>
         <label>
           Start url:
@@ -82,7 +68,7 @@ const Home = ({socket}) => {
 
       {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
         <div key={queryWithResults.id}>
-          <h2>Query [{queryWithResults.id}], {queryWithResults.visit}</h2>
+          <h2>Query [{queryWithResults.id}], started on {queryWithResults.startUrl}</h2>
           <button onClick={() => runCrawlAgain(queryWithResults.id)}>Run again</button>
 
           {queryWithResults.crawlResults && queryWithResults.crawlResults.map((crawl, index) => 
@@ -91,7 +77,7 @@ const Home = ({socket}) => {
               <ul>
                 {crawl.results && crawl.results.slice(0, 20).map((result, index) => 
                   <li key={index}>
-                    On {result.on}, found {result.found.substring(0, 30)}
+                    On {result.on} ::| found |:: {result.found.substring(0, 30)}
                   </li>
                 )}
               </ul>
