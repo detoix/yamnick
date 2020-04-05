@@ -12,6 +12,7 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 *.sh
+nodemon.json
 
 # Build results
 [Dd]ebug/
@@ -239,3 +240,4 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+Web/nodemon.json
