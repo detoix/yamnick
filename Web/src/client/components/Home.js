@@ -64,38 +64,41 @@ const Home = ({socket}) => {
 
   return (
     <div>
-      
-      <h1>Hello, world!</h1>
-          <button onClick={tell}>Increment</button>
+      {!(loading || !user) && <h1>Hello, {user.name}!</h1>}
 
+      <button onClick={tell}>Run default crawl</button> 
 
+      <form onSubmit={handleSubmit}>
+        <label>
+          Visit:
+          <input type="text" value={visit} onChange={e => setVisit(e.target.value)} />
+        </label>
+        <label>
+          Select:
+          <input type="text" value={selector} onChange={e => setSelector(e.target.value)} />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
 
+      {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
+        <div key={queryWithResults.id}>
+          <h2>Query [{queryWithResults.id}], {queryWithResults.visit}</h2>
+          <button>Run again</button>
 
-                  {!(loading || !user) &&
-                
-                  <p>{user.name}
-                      {user.email} {user.sub}</p>}
-
-
-
-          <form onSubmit={handleSubmit}>
-            <label>
-              Visit:
-              <input type="text" value={visit} onChange={e => setVisit(e.target.value)} />
-            </label>
-            <label>
-              Select:
-              <input type="text" value={selector} onChange={e => setSelector(e.target.value)} />
-            </label>
-            <input type="submit" value="Submit" />
-          </form>
-
-          {queriesData &&
-                
-                <p>{queriesData.replyTo}</p>
-                
-          }
-
+          {queryWithResults.crawlResults && queryWithResults.crawlResults.map(crawl => 
+            <span key={crawl.id}>
+              <h3>Crawl number {crawl.id}</h3>
+              <ul>
+                {crawl.results && crawl.results.map((result, index) => 
+                  <li key={index}>
+                    On {result.on}, found {result.found.substring(0, 30)}
+                  </li>
+                )}
+              </ul>
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
