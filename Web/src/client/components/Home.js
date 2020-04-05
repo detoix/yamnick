@@ -4,8 +4,9 @@ import { useAuth0 } from "../utils/react-auth0-spa";
 
 const Home = ({socket}) => {
   const [queriesData, setQueriesData] = useState(null)
-  const [visit, setVisit] = useState('')
-  const [selector, setSelector] = useState('')
+  const [startUrl, setStartUrl] = useState('')
+  const [follow, setFollow] = useState('')
+  const [collect, setCollect] = useState('')
   const { loading, user } = useAuth0();
 
   useEffect(() => {
@@ -22,22 +23,9 @@ const Home = ({socket}) => {
     let crawlRequest = {
       crawlCommand: 
       {
-        visit: "https://www.money.pl/sekcja/koronawirus/",
-        spiders: 
-        [
-          {
-            selector: "p.sc-1mh2gec-0",
-          },
-          {
-            visit: "a.sc-17rdsii-2::attr(href)",
-            spiders: 
-            [
-              {
-                selector: "div.b300",
-              },
-            ]
-          }
-        ]
+        startUrl: "https://www.bankier.pl/wiadomosc/95",
+        follow: ['a.next.btn', 'span.entry-title a'],
+        collect: ['span.entry-title', 'span.lead']
       }
     }
 
@@ -50,13 +38,9 @@ const Home = ({socket}) => {
     let crawlRequest = {
       crawlCommand: 
       {
-        visit: visit,
-        spiders: 
-        [
-          {
-            selector: selector,
-          }
-        ]
+        startUrl: startUrl,
+        follow: follow,
+        collect: collect
       }
     }
     socket.emit("query_issued", JSON.stringify(crawlRequest))
@@ -82,12 +66,16 @@ const Home = ({socket}) => {
 
       <form onSubmit={handleSubmit}>
         <label>
-          Visit:
-          <input type="text" value={visit} onChange={e => setVisit(e.target.value)} />
+          Start url:
+          <input type="text" value={startUrl} onChange={e => setStartUrl(e.target.value)} />
         </label>
         <label>
-          Select:
-          <input type="text" value={selector} onChange={e => setSelector(e.target.value)} />
+          Follow:
+          <input type="text" value={follow} onChange={e => setFollow(e.target.value)} />
+        </label>
+        <label>
+          Collect:
+          <input type="text" value={collect} onChange={e => setCollect(e.target.value)} />
         </label>
         <input type="submit" value="Submit" />
       </form>

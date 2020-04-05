@@ -27,9 +27,9 @@ namespace Contracts
     [Serializable]
     public class CrawlCommand : Message
     {
-        public string Visit { get; set; }
-        public string Selector { get; set; }
-        public CrawlCommand[] Spiders { get; set; }
+        public string StartUrl { get; set; }
+        public string[] Follow { get; set; }
+        public string[] Collect { get; set; }
         public List<CrawlResults> CrawlResults { get; set; }
     }
 

@@ -12,23 +12,19 @@ class RecursiveSpider(scrapy.Spider):
 
     def __init__(self, input):
         self.input = input
+        self.base_url = re.search('^.+?[^\/:](?=[?\/]|$)', input['startUrl']).group(0)
 
     def start_requests(self):
-        yield SplashRequest(self.input['visit'], self.run_nested_spiders)
+        yield SplashRequest(self.input['startUrl'], self.go)
 
-    def run_nested_spiders(self, response):
-        for spider_data in self.input['spiders']:
-            for result in RecursiveSpider(spider_data).parse(response):
-                yield result
-
-    def parse(self, response):
-        if self.input['selector'] is not None:
-            for extracted in response.css(self.input['selector']).extract():
+    def go(self, response):
+        for selector in self.input['collect']:
+            for extracted in response.css(selector).extract():
                 result = {}
                 result['on'] = response.url
                 result['found'] = BeautifulSoup(extracted).get_text().strip() 
                 yield result
-        elif self.input['visit'] is not None:
-            for html in response.css(self.input['visit']).extract():
-                visit = re.search('^.+?[^\/:](?=[?\/]|$)', response.url).group(0)
-                yield SplashRequest(visit + html.replace(visit, ''), self.run_nested_spiders)
+
+        for selector in self.input['follow']:
+            for extracted in response.css(selector + '::attr(href)').extract():
+                yield SplashRequest(self.base_url + extracted.replace(self.base_url, ''), self.go)
