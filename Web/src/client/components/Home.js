@@ -62,6 +62,18 @@ const Home = ({socket}) => {
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
+  const runCrawlAgain = id => {
+    event.preventDefault();
+
+    let crawlRequest = {
+      crawlCommand: 
+      {
+        id: id
+      }
+    }
+    socket.emit("query_issued", JSON.stringify(crawlRequest))
+  }
+
   return (
     <div>
       {!(loading || !user) && <h1>Hello, {user.name}!</h1>}
@@ -83,13 +95,13 @@ const Home = ({socket}) => {
       {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
         <div key={queryWithResults.id}>
           <h2>Query [{queryWithResults.id}], {queryWithResults.visit}</h2>
-          <button>Run again</button>
+          <button onClick={() => runCrawlAgain(queryWithResults.id)}>Run again</button>
 
-          {queryWithResults.crawlResults && queryWithResults.crawlResults.map(crawl => 
-            <span key={crawl.id}>
-              <h3>Crawl number {crawl.id}</h3>
+          {queryWithResults.crawlResults && queryWithResults.crawlResults.map((crawl, index) => 
+            <span key={index}>
+              <h3>Crawl number {index}</h3>
               <ul>
-                {crawl.results && crawl.results.map((result, index) => 
+                {crawl.results && crawl.results.slice(0, 20).map((result, index) => 
                   <li key={index}>
                     On {result.on}, found {result.found.substring(0, 30)}
                   </li>

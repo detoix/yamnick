@@ -88,7 +88,9 @@ namespace CrawlersManager
                         }
                         else
                         {
-                            System.Console.WriteLine($"Invalid query of {args.Id} by user of {args.ReplyTo}, query already exists");
+                            System.Console.WriteLine($"Query of {args.Id} by user of {args.ReplyTo} already exists");
+
+                            this.Sender.Tell(new CrawlCommandPersisted(existingQuery));
                         }
                     }
                 }
