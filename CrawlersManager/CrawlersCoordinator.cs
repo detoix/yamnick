@@ -42,6 +42,11 @@ namespace CrawlersManager
                     args.QueryForUser.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.QueryForUser);
                 }
+                else if (args.RemoveQuery != null)
+                {
+                    args.RemoveQuery.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.RemoveQuery);
+                }
             });
 
             this.Receive<QueryForUser>(args =>
@@ -87,6 +92,21 @@ namespace CrawlersManager
                 });
 
                 this.SendUntyped(args.ReplyTo, message, string.Empty);
+            });
+        
+            this.Receive<RemoveQuery>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                this.PersistenceManager.Tell(args);
+            });
+
+            Context.System.EventStream.Subscribe(this.Self, typeof(QueryRemoved));
+            this.Receive<QueryRemoved>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                this.Self.Tell(new QueryForUser() { ReplyTo = args.ReplyTo });
             });
         }
     }

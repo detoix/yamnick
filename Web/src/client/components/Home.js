@@ -46,6 +46,18 @@ const Home = ({socket}) => {
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
+  const remove = id => {
+    event.preventDefault();
+
+    let removeQuery = {
+      removeQuery: 
+      {
+        id: id
+      }
+    }
+    socket.emit("query_issued", JSON.stringify(removeQuery))
+  }
+
   return (
     <div>
       {!(loading || !user) && <h1>Hello, {user.name}!</h1>}
@@ -70,6 +82,7 @@ const Home = ({socket}) => {
         <div key={queryWithResults.id}>
           <h2>Query [{queryWithResults.id}], started on {queryWithResults.startUrl}</h2>
           <button onClick={() => runCrawlAgain(queryWithResults.id)}>Run again</button>
+          <button onClick={() => remove(queryWithResults.id)}>Remove</button>
 
           {queryWithResults.crawlResults && queryWithResults.crawlResults.map((crawl, index) => 
             <span key={index}>

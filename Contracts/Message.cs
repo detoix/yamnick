@@ -17,11 +17,24 @@ namespace Contracts
     }
 
     [Serializable]
+    public class RemoveQuery : Message
+    {
+
+    }
+
+    [Serializable]
+    public class QueryRemoved : Message
+    {
+        
+    }
+
+    [Serializable]
     public class TypedMessage : Message
     {
         public QueryForUser QueryForUser { get; set; }
         public CrawlCommand CrawlCommand { get; set; }
         public CrawlResults CrawlResults { get; set; }
+        public RemoveQuery RemoveQuery { get; set; }
     }
 
     [Serializable]

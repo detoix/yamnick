@@ -145,6 +145,46 @@ namespace CrawlersManager
                     }
                 }
             });
+        
+            this.Receive<RemoveQuery>(args =>
+            {
+                System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                using (var session = store.OpenSession())
+                {
+                    var existingUser = session
+                        .Query<User>()
+                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .SingleOrDefault();
+
+                    if (existingUser is null)
+                    {
+                        System.Console.WriteLine($"User of {args.ReplyTo} not found");
+                    }
+                    else
+                    {
+                        System.Console.WriteLine($"Updating user of {args.ReplyTo}");
+
+                        var numberOfRemoved = existingUser
+                            .QueriesWithResults
+                            .RemoveAll(e => e.Id == args.Id);
+
+                        if (numberOfRemoved > 0)
+                        {
+                            System.Console.WriteLine($"Removed query of {args.Id} by user of {args.ReplyTo}");
+
+                            session.Store(existingUser);
+                            session.SaveChanges();
+
+                            Context.System.EventStream.Publish(new QueryRemoved() { Id = args.Id, ReplyTo = args.ReplyTo });
+                        }
+                        else
+                        {
+                            System.Console.WriteLine($"Query of {args.Id} by user of {args.ReplyTo} not found");
+                        }
+                    }
+                }
+            });
         }
 
         private void EnsureDatabaseValid()
