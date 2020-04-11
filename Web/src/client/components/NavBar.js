@@ -8,7 +8,7 @@ const NavBar = () => {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
 
   return (
-    <AppBar position="static">
+    <AppBar position="sticky">
       <Toolbar>
         <IconButton edge="start">
           <Menu />
@@ -16,14 +16,10 @@ const NavBar = () => {
         <Typography variant="h6">
           News
         </Typography>
-        
         {!isAuthenticated && <Button color="inherit" onClick={() => loginWithRedirect({})}>Log in</Button>}
         {isAuthenticated && <Button color="inherit" onClick={() => logout()}>Log out</Button>}
-
-
       </Toolbar>
     </AppBar>
-
   );
 };
 
