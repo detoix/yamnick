@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom'   
-import { useAuth0 } from "../utils/react-auth0-spa";
+import { Button, FormControl, InputLabel, Input,
+  IconButton, Card, CardContent, CardActions, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, FormGroup, Paper, Grid, Container } from '@material-ui/core';
+import { Delete, Replay } from '@material-ui/icons'
 
 const Home = ({socket}) => {
   const [queriesData, setQueriesData] = useState(null)
   const [startUrl, setStartUrl] = useState('https://www.bankier.pl/wiadomosc/95')
   const [follow, setFollow] = useState('a.next.btn, span.entry-title a')
   const [collect, setCollect] = useState('span.entry-title, span.lead')
-  const { loading, user } = useAuth0();
 
   useEffect(() => {
     socket
@@ -19,9 +21,7 @@ const Home = ({socket}) => {
       }))
   }, []);
 
-  const handleSubmit = event => {
-    event.preventDefault();
-
+  const handleSubmit = () => {
     let crawlRequest = {
       crawlCommand: 
       {
@@ -35,8 +35,6 @@ const Home = ({socket}) => {
   }
 
   const runCrawlAgain = id => {
-    event.preventDefault();
-
     let crawlRequest = {
       crawlCommand: 
       {
@@ -47,8 +45,6 @@ const Home = ({socket}) => {
   }
 
   const remove = id => {
-    event.preventDefault();
-
     let removeQuery = {
       removeQuery: 
       {
@@ -59,46 +55,77 @@ const Home = ({socket}) => {
   }
 
   return (
-    <div>
-      {!(loading || !user) && <h1>Hello, {user.name}!</h1>}
+    <Container>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Card>
+            <CardContent>
+              <FormGroup>
+                <FormControl>
+                  <InputLabel>Start url</InputLabel>
+                  <Input value={startUrl} onChange={e => setStartUrl(e.target.value)} />
+                </FormControl>
+                <FormControl>
+                  <InputLabel>Follow</InputLabel>
+                  <Input value={follow} onChange={e => setFollow(e.target.value)} />
+                </FormControl>
+                <FormControl>
+                  <InputLabel>Collect</InputLabel>
+                  <Input value={collect} onChange={e => setCollect(e.target.value)} />
+                </FormControl>
+                <Button variant="contained" color="primary" onClick={() => handleSubmit()}>Submit</Button>
+              </FormGroup>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Start url:
-          <input type="text" value={startUrl} onChange={e => setStartUrl(e.target.value)} />
-        </label>
-        <label>
-          Follow:
-          <input type="text" value={follow} onChange={e => setFollow(e.target.value)} />
-        </label>
-        <label>
-          Collect:
-          <input type="text" value={collect} onChange={e => setCollect(e.target.value)} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
+        {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
+          <Grid item xs={6} key={queryWithResults.id}>
+            <Card>
+              <CardContent>
+                <h2>Query [{queryWithResults.id}], started on {queryWithResults.startUrl}</h2>
 
-      {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
-        <div key={queryWithResults.id}>
-          <h2>Query [{queryWithResults.id}], started on {queryWithResults.startUrl}</h2>
-          <button onClick={() => runCrawlAgain(queryWithResults.id)}>Run again</button>
-          <button onClick={() => remove(queryWithResults.id)}>Remove</button>
+                <IconButton onClick={() => runCrawlAgain(queryWithResults.id)}>
+                  <Replay />
+                </IconButton>
 
-          {queryWithResults.crawlResults && queryWithResults.crawlResults.map((crawl, index) => 
-            <span key={index}>
-              <h3>Crawl number {index}</h3>
-              <ul>
-                {crawl.results && crawl.results.slice(0, 20).map((result, index) => 
-                  <li key={index}>
-                    On {result.on} ::| found |:: {result.found.substring(0, 30)}
-                  </li>
+                <IconButton onClick={() => remove(queryWithResults.id)}>
+                  <Delete />
+                </IconButton>
+
+                {queryWithResults.crawlResults && queryWithResults.crawlResults.map((crawl, index) => 
+                  <span key={index}>
+                    <h3>Crawl number {index}</h3>
+
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Dessert (100g serving)</TableCell>
+                            <TableCell align="right">Calories</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {crawl.results && crawl.results.slice(0, 3).map((result, index) => 
+                            <TableRow key={index}>
+                              <TableCell component="th" scope="row">{result.on}</TableCell>
+                              <TableCell align="right">{result.found.substring(0, 100)}</TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </span>
                 )}
-              </ul>
-            </span>
-          )}
-        </div>
-      )}
-    </div>
+              </CardContent>
+              <CardActions>
+                <Button size="small">Learn More</Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        )}
+      </Grid>
+    </Container>
   );
 }
 
