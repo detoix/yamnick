@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, withRouter } from 'react-router-dom'   
 import { Button, FormControl, InputLabel, Input,
   IconButton, Card, CardContent, CardActions,
-  FormGroup, Grid} from '@material-ui/core';
-import { Delete } from '@material-ui/icons'
+  FormGroup, Grid, Typography} from '@material-ui/core';
+import { Delete, Launch } from '@material-ui/icons'
+import { useStyles } from "../utils/useStyles";
 
 const Home = ({socket}) => {
   const [queriesData, setQueriesData] = useState(null)
   const [startUrl, setStartUrl] = useState('https://www.bankier.pl/wiadomosc/95')
   const [follow, setFollow] = useState('a.next.btn, span.entry-title a')
   const [collect, setCollect] = useState('span.entry-title, span.lead')
+  const classes = useStyles();
 
   useEffect(() => {
     socket
@@ -51,9 +53,9 @@ const Home = ({socket}) => {
       <Grid item xs={6}>
         <Card>
           <CardContent>
-            <FormGroup>
+            <FormGroup className={classes.root}>
               <FormControl>
-                <InputLabel>Start url</InputLabel>
+                <InputLabel>Start crawling on</InputLabel>
                 <Input value={startUrl} onChange={e => setStartUrl(e.target.value)} />
               </FormControl>
               <FormControl>
@@ -74,15 +76,25 @@ const Home = ({socket}) => {
         <Grid item xs={6} key={queryWithResults.id}>
           <Card>
             <CardContent>
-              <h2>Query [{queryWithResults.id}], started on {queryWithResults.startUrl}</h2>
-              <IconButton onClick={() => remove(queryWithResults.id)}>
-                <Delete />
-              </IconButton>
+              <Typography color="textSecondary" gutterBottom>
+                Query No {queryWithResults.id}
+              </Typography>
+              <Typography variant="h5" component="h2">
+                Started on {queryWithResults.startUrl}
+              </Typography>
+              <Typography color="textSecondary">
+                Results from {queryWithResults.crawlResults.length} runs
+              </Typography>
             </CardContent>
             <CardActions>
               <Link to={'/query/' + queryWithResults.id}>
-                <Button size="small">Learn More</Button>
+                <IconButton>
+                  <Launch />
+                </IconButton>
               </Link>
+              <IconButton onClick={() => remove(queryWithResults.id)}>
+                <Delete />
+              </IconButton>
             </CardActions>
           </Card>
         </Grid>

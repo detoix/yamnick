@@ -14,10 +14,9 @@ const NavBar = () => {
           <Menu />
         </IconButton>
         <Typography variant="h6">
-          News
+          {!isAuthenticated && <Button color="inherit" onClick={() => loginWithRedirect({})}>Log in</Button>}
+          {isAuthenticated && <Button color="inherit" onClick={() => logout()}>Log out</Button>}
         </Typography>
-        {!isAuthenticated && <Button color="inherit" onClick={() => loginWithRedirect({})}>Log in</Button>}
-        {isAuthenticated && <Button color="inherit" onClick={() => logout()}>Log out</Button>}
       </Toolbar>
     </AppBar>
   );
