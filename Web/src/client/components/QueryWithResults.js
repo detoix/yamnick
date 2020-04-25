@@ -3,12 +3,11 @@ import { withRouter, useParams } from 'react-router-dom'
 import { IconButton, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TablePagination, TableRow, Box, Grid, Typography } from '@material-ui/core';
 import { Delete, Replay } from '@material-ui/icons'
+import CrawlResultsTable from './CrawlResultsTable';
 
 const QueryWithResult = ({socket}) => {
   const { id } = useParams()
   const [queryData, setQueryData] = useState(null)
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
     socket
@@ -35,15 +34,6 @@ const QueryWithResult = ({socket}) => {
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   return queryData && (
     <Box>
       <Typography color="textSecondary" gutterBottom>
@@ -60,35 +50,7 @@ const QueryWithResult = ({socket}) => {
       </IconButton>
       <Grid container spacing={2}>
         {queryData.crawlResults && queryData.crawlResults.map((crawl, index) => 
-          <Grid item xs={6} key={index}>
-            <TableContainer component={Paper}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>On</TableCell>
-                    <TableCell align="right">Found</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {crawl.results && crawl.results.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((result, index) => 
-                    <TableRow key={index}>
-                      <TableCell component="th" scope="row">{result.on}</TableCell>
-                      <TableCell align="right">{result.found.substring(0, 100)}</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={crawl.results.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          </Grid>
+          <CrawlResultsTable key={index} crawl={crawl} />
         )}
       </Grid>
     </Box>
