@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 import { useAuth0 } from "./utils/react-auth0-spa";
 import history from "./utils/history";
@@ -10,28 +10,28 @@ import { Container } from '@material-ui/core';
 
 const App = () => {
   const { isAuthenticated, getTokenSilently, loading } = useAuth0();
-  const [ready, setReady] = useState(false)
-  const [socket, setSocket] = useState(
-    socketIOClient(window.location.origin))
+  const [socket, setSocket] = useState(null)
 
   useEffect(() => {
     const authorize = async () => {
+      const socket = socketIOClient(window.location.origin)
+
       if (!isAuthenticated)
       {
-        setReady(true)
+        setSocket(socket)
         return
       }
 
       const token = await getTokenSilently();
       socket
         .emit('authenticate', { token: token })
-        .on('server_ready', () => {
-          setReady(true)
+        .once('server_ready', () => {
+          setSocket(socket)
         })
-        .on('authenticated', () => {
+        .once('authenticated', () => {
           
         })
-        .on('unauthorized', (msg) => {
+        .once('unauthorized', (msg) => {
           console.log(`unauthorized: ${JSON.stringify(msg.data)}`);
         })
     };
@@ -40,7 +40,7 @@ const App = () => {
     }
   }, [loading, getTokenSilently]);
 
-  if (!ready)
+  if (!socket)
   {
     return <div>Loading...</div> 
   }

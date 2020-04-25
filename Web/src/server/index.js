@@ -17,6 +17,7 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
         secret: process.env.AUTH0_CLIENT_SECRET,
         timeout: 5000 // 5 seconds to send the authentication message
     }))
+    .on('connection', () => console.log('New connection approaches...'))
     .on("authenticated", socket => {
         console.log("New client connected as", socket.decoded_token.sub);
         

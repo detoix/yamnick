@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, withRouter } from 'react-router-dom'   
 import { Button, FormControl, InputLabel, Input,
-  IconButton, Card, CardContent, CardActions, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, FormGroup, Paper, Grid, Container } from '@material-ui/core';
-import { Delete, Replay } from '@material-ui/icons'
+  IconButton, Card, CardContent, CardActions,
+  FormGroup, Grid} from '@material-ui/core';
+import { Delete } from '@material-ui/icons'
 
 const Home = ({socket}) => {
   const [queriesData, setQueriesData] = useState(null)
