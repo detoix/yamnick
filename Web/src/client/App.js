@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 import { useAuth0 } from "./utils/react-auth0-spa";
 import history from "./utils/history";
