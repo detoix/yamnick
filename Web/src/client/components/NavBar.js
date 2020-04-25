@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from 'react-router-dom'  
 import { useAuth0 } from "../utils/react-auth0-spa";
 import { Button, AppBar, Toolbar, IconButton,
   Typography } from '@material-ui/core';
-import { Menu } from '@material-ui/icons'
+import { Home } from '@material-ui/icons'
 
 const NavBar = () => {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
@@ -10,9 +11,11 @@ const NavBar = () => {
   return (
     <AppBar position="sticky">
       <Toolbar>
-        <IconButton edge="start">
-          <Menu />
-        </IconButton>
+        <Link to='/'>
+          <IconButton>
+            <Home />
+          </IconButton>
+        </Link>
         <Typography variant="h6">
           {!isAuthenticated && <Button color="inherit" onClick={() => loginWithRedirect({})}>Log in</Button>}
           {isAuthenticated && <Button color="inherit" onClick={() => logout()}>Log out</Button>}
