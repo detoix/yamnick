@@ -165,22 +165,58 @@ namespace CrawlersManager
                     {
                         System.Console.WriteLine($"Updating user of {args.ReplyTo}");
 
-                        var numberOfRemoved = existingUser
-                            .QueriesWithResults
-                            .RemoveAll(e => e.Id == args.Id);
-
-                        if (numberOfRemoved > 0)
+                        if (!args.CrawlResults.Results.Any())
                         {
-                            System.Console.WriteLine($"Removed query of {args.Id} by user of {args.ReplyTo}");
+                            var numberOfRemoved = existingUser
+                                .QueriesWithResults
+                                .RemoveAll(e => e.Id == args.Id);
 
-                            session.Store(existingUser);
-                            session.SaveChanges();
+                            if (numberOfRemoved > 0)
+                            {
+                                System.Console.WriteLine($"Removed query of {args.Id} by user of {args.ReplyTo}");
 
-                            Context.System.EventStream.Publish(new QueryRemoved() { Id = args.Id, ReplyTo = args.ReplyTo });
+                                session.Store(existingUser);
+                                session.SaveChanges();
+
+                                Context.System.EventStream.Publish(new QueryRemoved() { Id = args.Id, ReplyTo = args.ReplyTo });
+                            }
+                            else
+                            {
+                                System.Console.WriteLine($"Query of {args.Id} by user of {args.ReplyTo} not found");
+                            }
                         }
                         else
                         {
-                            System.Console.WriteLine($"Query of {args.Id} by user of {args.ReplyTo} not found");
+                            var queryToUpdate = existingUser
+                                .QueriesWithResults
+                                .FirstOrDefault(e => e.Id == args.Id);
+
+                            if (queryToUpdate is null)
+                            {
+                                System.Console.WriteLine($"Query of {args.Id} by user of {args.ReplyTo} not found");
+                            }
+                            else
+                            {
+                                var idsOfCrawlsToRemove = args.CrawlResults.Results
+                                    .Select(e => e.Id).ToHashSet();
+                                var numberOfRemoved = queryToUpdate
+                                    .CrawlResults
+                                    .RemoveAll(e => idsOfCrawlsToRemove.Contains(e.Id));
+
+                                if (numberOfRemoved > 0)
+                                {
+                                    System.Console.WriteLine($"Removed some crawls from query of {args.Id} by user of {args.ReplyTo}");
+
+                                    session.Store(existingUser);
+                                    session.SaveChanges();
+
+                                    Context.System.EventStream.Publish(new QueryRemoved() { Id = args.Id, ReplyTo = args.ReplyTo });
+                                }
+                                else
+                                {
+                                    System.Console.WriteLine($"Crawls of {string.Join(',', idsOfCrawlsToRemove)} within query of {args.Id} by user of {args.ReplyTo} not found");
+                                }
+                            }
                         }
                     }
                 }

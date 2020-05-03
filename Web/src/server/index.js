@@ -7,6 +7,7 @@ const amqp = require('amqplib/callback_api');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const sockets = {}
 
 amqp.connect(process.env.AMQP, function(error0, connection) {
     if (error0) {
@@ -21,6 +22,14 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
     .on("authenticated", socket => {
         console.log("New client connected as", socket.decoded_token.sub);
         
+        if (socket.decoded_token.sub in sockets) {
+            sockets[socket.decoded_token.sub].add(socket)
+        } else {
+            var set = new Set();
+            set.add(socket)
+            sockets[socket.decoded_token.sub] = set
+        }
+        
         connection.createChannel(function(error1, channel) {
             if (error1) {
                 throw error1;
@@ -34,7 +43,10 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
                 channel.consume(q.queue, function(msg) {
                     let message = msg.content.toString()
                     console.log("Server received response of length:", message.length);
-                    socket.emit("response_received", message)
+                    for (let s of sockets[socket.decoded_token.sub]) {
+                        s.emit("response_received", message)
+                        console.log("Message emitted to client")
+                    }
                 }, { noAck: true });
 
                 socket.on("query_issued", (data) => {
@@ -49,6 +61,7 @@ amqp.connect(process.env.AMQP, function(error0, connection) {
             socket.on("disconnect", () => 
             {
                 channel.close()
+                sockets[socket.decoded_token.sub].delete(socket)
                 console.log("Client disconnected")
             });
         });

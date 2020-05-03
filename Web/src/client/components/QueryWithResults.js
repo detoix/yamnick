@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter, useParams } from 'react-router-dom'   
+import { withRouter, useParams, useHistory } from 'react-router-dom'   
 import { IconButton, Box, Grid, Typography,
   Card, CardContent } from '@material-ui/core';
 import { Delete, Replay } from '@material-ui/icons'
@@ -7,6 +7,7 @@ import CrawlResultsTable from './CrawlResultsTable';
 
 const QueryWithResult = ({socket}) => {
   const { id } = useParams()
+  const history = useHistory();
   const [queryData, setQueryData] = useState(null)
 
   useEffect(() => {
@@ -34,14 +35,23 @@ const QueryWithResult = ({socket}) => {
     socket.emit("query_issued", JSON.stringify(crawlRequest))
   }
 
-  const remove = id => {
+  const remove = (id, crawlIds) => {
     let removeQuery = {
       removeQuery: 
       {
-        id: id
+        id: id,
+        crawlResults: {
+          results: crawlIds
+        }
       }
     }
+
     socket.emit("query_issued", JSON.stringify(removeQuery))
+  }
+
+  const removeThenRedirect = id => {
+    remove(id, [])
+    history.push('/')
   }
 
   return queryData && (
@@ -60,13 +70,13 @@ const QueryWithResult = ({socket}) => {
           <IconButton onClick={() => runCrawlAgain(queryData.id)}>
             <Replay />
           </IconButton>
-          <IconButton onClick={() => remove(queryData.id)}>
+          <IconButton onClick={() => removeThenRedirect(queryData.id)}>
             <Delete />
           </IconButton>
         </Grid>
 
-        {queryData.crawlResults && queryData.crawlResults.map((crawl, index) => 
-          <CrawlResultsTable key={index} crawl={crawl} />
+        {queryData.crawlResults && queryData.crawlResults.map(crawl => 
+          <CrawlResultsTable key={crawl.id} crawl={crawl} remove={(crawlIds) => remove(queryData.id, crawlIds)} />
         )}
       </Grid>
     </Box>

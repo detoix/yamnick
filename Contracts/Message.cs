@@ -19,7 +19,7 @@ namespace Contracts
     [Serializable]
     public class RemoveQuery : Message
     {
-
+        public CrawlResults CrawlResults { get; set; }
     }
 
     [Serializable]

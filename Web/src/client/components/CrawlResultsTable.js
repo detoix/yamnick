@@ -31,7 +31,7 @@ const CrawlResultsTable = (props) => {
               <GetApp />
             </IconButton>
           </CSVLink>
-          <IconButton>
+          <IconButton onClick={() => props.remove([{id: props.crawl.id}])}>
             <Delete />
           </IconButton>
           <TableContainer component={Paper}>
