@@ -165,7 +165,9 @@ namespace CrawlersManager
                     {
                         System.Console.WriteLine($"Updating user of {args.ReplyTo}");
 
-                        if (!args.CrawlResults.Results.Any())
+                        if (args.CrawlResults is null 
+                            || args.CrawlResults.Results is null 
+                            || !args.CrawlResults.Results.Any())
                         {
                             var numberOfRemoved = existingUser
                                 .QueriesWithResults

@@ -54,7 +54,7 @@ namespace CrawlersManager
                 clientCommandsConsumer.Received += (model, ea) => 
                 {
                     var serialized = Encoding.UTF8.GetString(ea.Body);
-                    System.Console.WriteLine(serialized);
+                    System.Console.WriteLine($"System received message of {serialized}");
                     var message = JsonSerializer.Deserialize<TypedMessage>(serialized, new  JsonSerializerOptions()
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
