@@ -11,6 +11,8 @@ class RecursiveSpider(scrapy.Spider):
     }
 
     def __init__(self, input):
+        self.counter = 0
+        self.max_count = 50
         self.startUrl = input['startUrl']
         self.collect = input['collect']
         self.follow = input['follow']
@@ -25,13 +27,16 @@ class RecursiveSpider(scrapy.Spider):
             for selector in self.collect:
                 if selector:
                     for extracted in response.css(selector).extract():
-                        result = {}
-                        result['on'] = response.url
-                        result['found'] = BeautifulSoup(extracted).get_text().strip() 
-                        yield result
+                        if self.counter < self.max_count:
+                            self.counter = self.counter + 1
+                            result = {}
+                            result['on'] = response.url
+                            result['found'] = BeautifulSoup(extracted).get_text().strip() 
+                            yield result
 
-        if self.follow:
-            for selector in self.follow:
-                if selector:
-                    for extracted in response.css(selector + '::attr(href)').extract():
-                        yield SplashRequest(self.base_url + extracted.replace(self.base_url, ''), self.go)
+        if self.counter < self.max_count:
+            if self.follow:
+                for selector in self.follow:
+                    if selector:
+                        for extracted in response.css(selector + '::attr(href)').extract():
+                            yield SplashRequest(self.base_url + extracted.replace(self.base_url, ''), self.go)
