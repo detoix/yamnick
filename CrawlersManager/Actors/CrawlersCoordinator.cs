@@ -3,7 +3,7 @@ using Contracts;
 using CrawlersManager.Events;
 using System.Text.Json;
 
-namespace CrawlersManager
+namespace CrawlersManager.Actors
 {
     delegate void Send(string channel, string message, string replyTo);
 

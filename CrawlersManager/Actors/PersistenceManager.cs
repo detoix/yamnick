@@ -5,7 +5,7 @@ using Contracts;
 using CrawlersManager.Events;
 using Marten;
 
-namespace CrawlersManager
+namespace CrawlersManager.Actors
 {
     class PersistenceManager : ReceiveActor
     {
@@ -15,7 +15,6 @@ namespace CrawlersManager
             IDocumentStore store)
         {
             this.Store = store;
-            this.EnsureDatabaseValid();
 
             this.Receive<QueryForUser>(args =>
             {
@@ -225,32 +224,12 @@ namespace CrawlersManager
             });
         }
 
-        private void EnsureDatabaseValid()
+        protected override void PreStart()
         {
             using (var session = this.Store.OpenSession())
             {
                 session.Store<User>();
                 session.SaveChanges();
-            }
-        }
-        
-        public static string ValidConnectionStringFrom(string connectionString)
-        {
-            if (!connectionString.StartsWith("postgres"))
-            {
-                return connectionString;
-            }
-            else
-            {
-                var delimiterChars = new[] { '/', ':', '@', '?' };
-                var strConn = connectionString.Replace("//", "").Split(delimiterChars).Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                var user = strConn[1];
-                var pass = strConn[2];
-                var server = strConn[3];
-                var database = strConn[5];
-                var port = strConn[4];
-                
-                return $"Server={server};Port={port};Database={database};User Id={user};Password={pass};sslmode=Require;Trust Server Certificate=true";
             }
         }
     }
