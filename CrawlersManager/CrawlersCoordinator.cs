@@ -5,23 +5,19 @@ using System.Text.Json;
 
 namespace CrawlersManager
 {
-    delegate void SendUntyped(string channel, string message, string replyTo);
-    delegate void SendTyped(string channel, object message, string replyTo);
+    delegate void Send(string channel, string message, string replyTo);
 
     class CrawlersCoordinator : ReceiveActor
     {
         private IActorRef PersistenceManager { get; }
-        private SendUntyped SendUntyped { get; }
-        private SendTyped SendTyped { get; }
+        private Send Send { get; }
 
         public CrawlersCoordinator(
             IActorRef persistenceManager,
-            SendUntyped sendUntyped,
-            SendTyped sendTyped)
+            Send send)
         {
             this.PersistenceManager = persistenceManager;
-            this.SendUntyped = sendUntyped;
-            this.SendTyped = sendTyped;
+            this.Send = send;
 
             this.Receive<TypedMessage>(args =>
             {
@@ -72,7 +68,7 @@ namespace CrawlersManager
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                this.SendUntyped("crawl_queue", message, args.CrawlCommand.ReplyTo);
+                this.Send("crawl_queue", message, args.CrawlCommand.ReplyTo);
             });
 
             this.Receive<CrawlResults>(args =>
@@ -91,7 +87,7 @@ namespace CrawlersManager
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                this.SendUntyped(args.ReplyTo, message, string.Empty);
+                this.Send(args.ReplyTo, message, string.Empty);
             });
         
             this.Receive<RemoveQuery>(args =>

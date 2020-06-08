@@ -22,7 +22,7 @@ namespace CrawlersManager
             using (var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
-                SendUntyped sendUntyped = (chanell, message, replyTo) =>
+                Send send = (chanell, message, replyTo) =>
                 {
                     var props = channel.CreateBasicProperties();
                     if (!string.IsNullOrEmpty(replyTo))
@@ -34,22 +34,10 @@ namespace CrawlersManager
                         body: Encoding.UTF8.GetBytes(message));
                 };
 
-                SendTyped sendTyped = (chanell, message, replyTo) =>
-                {
-                    var props = channel.CreateBasicProperties();
-                    if (!string.IsNullOrEmpty(replyTo))
-                        props.ReplyTo = replyTo;
-                    channel.BasicPublish(
-                        exchange: string.Empty,
-                        routingKey: chanell,
-                        basicProperties: props,
-                        body: message.ToByteArray());
-                };
-
                 var persistenceManager = system.ActorOf(
                     Props.Create<PersistenceManager>(store));
                 var actor = system.ActorOf(
-                    Props.Create<CrawlersCoordinator>(persistenceManager, sendUntyped, sendTyped));
+                    Props.Create<CrawlersCoordinator>(persistenceManager, send));
                 var clientCommandsConsumer = new EventingBasicConsumer(channel);
                 clientCommandsConsumer.Received += (model, ea) => 
                 {
@@ -66,12 +54,6 @@ namespace CrawlersManager
                     queue: "ClientCommands", 
                     autoAck: true,
                     consumer: clientCommandsConsumer);
-                var typedMessageConsumer = new EventingBasicConsumer(channel);
-                typedMessageConsumer.Received += (model, ea) => actor.Tell(ea.Body.ToObject());
-                channel.BasicConsume(
-                    queue: "TypedMessage", 
-                    autoAck: true, 
-                    consumer: typedMessageConsumer);
 
                 do
                 {
