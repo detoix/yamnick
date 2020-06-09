@@ -56,6 +56,7 @@ namespace Contracts
     public class CrawlResult : Message
     {
         public string On { get; set; }
+        public string From { get; set; }
         public string Found { get; set; }
     }
 

@@ -29,8 +29,11 @@ class RecursiveSpider(scrapy.Spider):
                     for extracted in response.css(selector).extract():
                         if self.counter < self.max_count:
                             self.counter = self.counter + 1
+                            referer = response.request.headers.get('referer')
                             result = {}
                             result['on'] = response.url
+                            if referer is not None:
+                                result['from'] = referer.decode('utf-8')
                             result['found'] = BeautifulSoup(extracted).get_text().strip() 
                             yield result
 
