@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useParams, useHistory } from 'react-router-dom'   
-import { IconButton, Box, Grid, Typography,
-  Card, CardContent } from '@material-ui/core';
+import { IconButton, Box, Grid, Typography } from '@material-ui/core';
 import { Delete, Replay } from '@material-ui/icons'
-import CrawlResultsTable from './CrawlResultsTable';
+import CrawlResults from './CrawlResults';
 
 const QueryWithResult = ({socket}) => {
   const { id } = useParams()
@@ -76,7 +75,7 @@ const QueryWithResult = ({socket}) => {
         </Grid>
 
         {queryData.crawlResults && queryData.crawlResults.map(crawl => 
-          <CrawlResultsTable key={crawl.id} crawl={crawl} remove={(crawlIds) => remove(queryData.id, crawlIds)} />
+          <CrawlResults key={crawl.id} crawl={crawl} remove={(crawlIds) => remove(queryData.id, crawlIds)} />
         )}
       </Grid>
     </Box>
