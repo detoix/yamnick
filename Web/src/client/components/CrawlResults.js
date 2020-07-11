@@ -13,7 +13,7 @@ const CrawlResultsTable = (props) => {
   const history = useHistory();
   const [page, setPage] = useState(0);
   const [tab, setTab] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [expandedRow, setExpandedRow] = useState(-1);
 
   const handleChangePage = (event, newPage) => {
@@ -110,7 +110,7 @@ const CrawlResultsTable = (props) => {
                 {props.crawl.results && props.crawl.results.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((result, index) => 
                   <TableRow key={index} onClick={() => setExpandedRow(expandedRow !== index ? index : -1)}>
                     {index !== expandedRow && <TableCell>{result.on}</TableCell>}
-                    {index !== expandedRow && <TableCell align="right">{result.found.substring(0, 100)}...</TableCell>}
+                    {index !== expandedRow && <TableCell align="right">{result.found.substring(0, 200)}...</TableCell>}
                     {index === expandedRow && <TableCell colSpan={2}>{result.found}</TableCell>}
                   </TableRow>
                 )}
