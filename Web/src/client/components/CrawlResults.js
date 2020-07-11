@@ -110,7 +110,7 @@ const CrawlResultsTable = (props) => {
                 {props.crawl.results && props.crawl.results.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((result, index) => 
                   <TableRow key={index} onClick={() => setExpandedRow(expandedRow !== index ? index : -1)}>
                     {index !== expandedRow && <TableCell>{result.on}</TableCell>}
-                    {index !== expandedRow && <TableCell>{result.found.substring(0, 100)}...</TableCell>}
+                    {index !== expandedRow && <TableCell align="right">{result.found.substring(0, 100)}...</TableCell>}
                     {index === expandedRow && <TableCell colSpan={2}>{result.found}</TableCell>}
                   </TableRow>
                 )}
