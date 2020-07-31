@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useParams, useHistory } from 'react-router-dom'   
 import { CSVLink } from "react-csv";
+import TagCloud from 'react-tag-cloud';
+import randomColor from 'randomcolor';
 import { Grid, TableContainer, Table, TableHead, TableRow,
   TableCell, TableBody, TablePagination, Paper, IconButton,
   Card, CardContent, Tabs, Tab } from '@material-ui/core';
@@ -38,9 +40,9 @@ const CrawlResultsTable = (props) => {
     }, {});
   };
 
-  const convertToTree = list => {
+  const convertToTree = () => {
     let lookup = {}
-    let groups = groupBy(list, 'on')
+    let groups = groupBy(props.crawl.results, 'on')
 
     Object.keys(groups).forEach(key => {
       let group = groups[key]
@@ -80,6 +82,28 @@ const CrawlResultsTable = (props) => {
     )
   }
 
+  const tokenize = () => {
+    let tokens = props.crawl.results
+      .map(result => result.found)
+      .reduce((a, b) => a.concat(b))
+      .split(" ")
+
+      //find the counts using reduce
+      var cnts = tokens.reduce( function (obj, val) {
+        obj[val] = (obj[val] || 0) + 1;
+        return obj;
+      }, {} );
+      //Use the keys of the object to get all the values of the array
+      //and sort those keys by their counts
+      var sorted = Object.keys(cnts).sort( function(a,b) {
+        return cnts[b] - cnts[a];
+      });
+
+      console.log(sorted)
+
+    return sorted
+  }
+
   return props.crawl && (
     <Grid item xs={12}>
       <Card>
@@ -96,6 +120,7 @@ const CrawlResultsTable = (props) => {
           <Tabs value={tab} onChange={(e, v) => setTab(v)} variant="fullWidth">
             <Tab label="List" />
             <Tab label="Tree" />
+            <Tab label="Cloud" />
           </Tabs>
 
           <TableContainer hidden={tab !== 0} component={Paper}>
@@ -132,9 +157,26 @@ const CrawlResultsTable = (props) => {
               defaultCollapseIcon={<ExpandMoreIcon />}
               defaultExpandIcon={<ChevronRightIcon />}
             >
-              {renderTree(convertToTree(props.crawl.results))}
+              {renderTree(convertToTree())}
             </TreeView> 
           </Paper>
+          <TagCloud 
+            hidden={tab !== 2}
+            style={{
+              width: 'inherit',
+              height: 200,
+              fontFamily: 'sans-serif',
+              fontSize: 30,
+              color: () => randomColor({
+                hue: 'blue'
+              }),
+              padding: 5,
+              flex: 1
+            }}>
+              {props.crawl.results && tokenize().slice(0, 50).map((token, index) => 
+                <div key={index}>{token}</div>
+              )}
+            </TagCloud>
         </CardContent>
       </Card>
     </Grid>
