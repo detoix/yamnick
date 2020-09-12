@@ -32,9 +32,37 @@ namespace Contracts
     public class TypedMessage : Message
     {
         public QueryForUser QueryForUser { get; set; }
+        public QueryFor<Diagram> QueryForDiagram { get; set; }
         public CrawlCommand CrawlCommand { get; set; }
         public CrawlResults CrawlResults { get; set; }
         public RemoveQuery RemoveQuery { get; set; }
+        public Diagram Diagram { get; set; }
+    }
+
+    [Serializable]
+    public class Persisted<T> : Message
+    {
+        public T Content { get; set; }
+    }
+
+    [Serializable]
+    public class QueryFor<T> : Message
+    {
+        
+    }
+
+    [Serializable]
+    public class Diagram : Message
+    {
+        public List<Point> Positions { get; set; }
+    }
+
+    [Serializable]
+    public class Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public string Src { get; set; }
     }
 
     [Serializable]

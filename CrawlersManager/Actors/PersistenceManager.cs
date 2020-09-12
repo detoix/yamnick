@@ -40,6 +40,33 @@ namespace CrawlersManager.Actors
                 }
             });
 
+            this.Receive<QueryFor<Diagram>>(args =>
+            {
+                System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                using (var session = store.OpenSession())
+                {
+                    var existingDiagram = session
+                        .Query<Diagram>()
+                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .SingleOrDefault();
+
+                    if (existingDiagram is null)
+                    {
+                        System.Console.WriteLine($"Diagram of {args.ReplyTo} not found");
+                    }
+                    else
+                    {
+                        System.Console.WriteLine($"Diagram of {args.ReplyTo} found, forwarding...");
+
+                        this.Sender.Tell(new Persisted<Diagram>()
+                        {
+                            Content = existingDiagram
+                        });
+                    }
+                }
+            });
+
             this.Receive<CrawlCommand>(args => 
             {
                 System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
@@ -222,6 +249,45 @@ namespace CrawlersManager.Actors
                     }
                 }
             });
+        
+            this.Receive<Diagram>(args =>
+            {
+                System.Console.WriteLine($"{nameof(PersistenceManager)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                using (var session = store.OpenSession())
+                {
+                    var existingDiagram = session
+                        .Query<Diagram>()
+                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .SingleOrDefault();
+                    
+                    if (existingDiagram is null)
+                    {
+                        System.Console.WriteLine($"Creating new user of {args.ReplyTo}");
+
+                        var diagram = args;
+                        session.Store(args);
+                        session.SaveChanges();
+
+                        this.Sender.Tell(new Persisted<Diagram>()
+                        {
+                            Content = diagram
+                        });
+                    }
+                    else
+                    {
+                        existingDiagram.Positions = args.Positions;
+
+                        session.Store(existingDiagram);
+                        session.SaveChanges();
+
+                        this.Sender.Tell(new Persisted<Diagram>()
+                        {
+                            Content = existingDiagram
+                        });
+                    }
+                }
+            });
         }
 
         protected override void PreStart()
@@ -229,6 +295,7 @@ namespace CrawlersManager.Actors
             using (var session = this.Store.OpenSession())
             {
                 session.Store<User>();
+                session.Store<Diagram>();
                 session.SaveChanges();
             }
         }

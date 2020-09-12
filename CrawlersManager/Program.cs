@@ -23,14 +23,14 @@ namespace CrawlersManager
             using (var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
-                Send send = (chanell, message, replyTo) =>
+                Send send = (channelName, message, replyTo) =>
                 {
                     var props = channel.CreateBasicProperties();
                     if (!string.IsNullOrEmpty(replyTo))
                         props.ReplyTo = replyTo;
                     channel.BasicPublish(
                         exchange: string.Empty,
-                        routingKey: chanell,
+                        routingKey: channelName,
                         basicProperties: props,
                         body: Encoding.UTF8.GetBytes(message));
                 };
@@ -51,8 +51,10 @@ namespace CrawlersManager
                     message.ReplyTo = ea.BasicProperties.ReplyTo;
                     coordinator.Tell(message);
                 };
+                var taskQueueName = "task_queue";
+                channel.QueueDeclare(taskQueueName, durable: true);
                 channel.BasicConsume(
-                    queue: "ClientCommands", 
+                    queue: taskQueueName, 
                     autoAck: true,
                     consumer: router);
 

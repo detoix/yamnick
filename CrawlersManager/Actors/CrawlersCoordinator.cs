@@ -38,14 +38,35 @@ namespace CrawlersManager.Actors
                     args.QueryForUser.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.QueryForUser);
                 }
+                else if (args.QueryForDiagram != null)
+                {
+                    args.QueryForDiagram.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.QueryForDiagram);
+                }
                 else if (args.RemoveQuery != null)
                 {
                     args.RemoveQuery.ReplyTo = args.ReplyTo;
                     this.Self.Forward(args.RemoveQuery);
                 }
+                else if (args.Diagram != null)
+                {
+                    args.Diagram.ReplyTo = args.ReplyTo;
+                    this.Self.Forward(args.Diagram);
+                }
+                else
+                {
+                    System.Console.WriteLine("Unknown message received");
+                }
             });
 
             this.Receive<QueryForUser>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+                
+                this.PersistenceManager.Tell(args);
+            });
+
+            this.Receive<QueryFor<Diagram>>(args =>
             {
                 System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
                 
@@ -89,7 +110,7 @@ namespace CrawlersManager.Actors
 
                 this.Send(args.ReplyTo, message, string.Empty);
             });
-        
+
             this.Receive<RemoveQuery>(args =>
             {
                 System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
@@ -103,6 +124,25 @@ namespace CrawlersManager.Actors
                 System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
 
                 this.Self.Tell(new QueryForUser() { ReplyTo = args.ReplyTo });
+            });
+        
+            this.Receive<Diagram>(args => 
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                this.PersistenceManager.Tell(args);
+            });
+
+            this.Receive<Persisted<Diagram>>(args =>
+            {
+                System.Console.WriteLine($"{nameof(CrawlersCoordinator)} processing {args} of {args.Id} by {args.ReplyTo}");
+
+                var message = JsonSerializer.Serialize(args.Content, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                this.Send(args.Content.ReplyTo, message, string.Empty);
             });
         }
     }
