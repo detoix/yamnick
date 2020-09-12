@@ -39,13 +39,8 @@ const openConnectionBetween = (socket, amqpConnection) => {
                 }
             }, { noAck: true });
 
-            socket.on("diagram_queried", (data) => {
-                console.log("Server received query of", data)
-                channel.sendToQueue('task_queue', Buffer.from(data), { replyTo: socket.decoded_token.sub })
-            });
-
-            socket.on("diagram_changed", (data) => {
-                console.log("Diagram has been changed to", data)
+            socket.on("request_issued", (data) => {
+                console.log("Server forwarding request of", data)
                 channel.sendToQueue('task_queue', Buffer.from(data), { replyTo: socket.decoded_token.sub })
             });
 
@@ -66,7 +61,8 @@ amqp.connect(process.env.AMQP, function(error0, amqpConnection) {
     if (error0) {
         throw error0;
     }
-    if (process.env.DEV) {
+    // if (process.env.DEV) { //TODO: use when user can create account
+    if (true) {
         io.on('connection', socket => {
             socket.decoded_token = {
                 sub: "dupa1"

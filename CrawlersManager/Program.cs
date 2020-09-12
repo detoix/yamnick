@@ -36,9 +36,9 @@ namespace CrawlersManager
                 };
 
                 var persistenceManager = system.ActorOf(
-                    Props.Create<PersistenceManager>(store));
+                    Props.Create<PersistenceActor>(store));
                 var coordinator = system.ActorOf(
-                    Props.Create<CrawlersCoordinator>(persistenceManager, send));
+                    Props.Create<GatewayActor>(persistenceManager, send));
                 var router = new EventingBasicConsumer(channel);
                 router.Received += (model, ea) => 
                 {
