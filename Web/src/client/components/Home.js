@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter } from 'react-router-dom'  
-import { Stage, Layer, Image } from 'react-konva';
+import { Stage, Layer, Image, Line, Arrow } from 'react-konva';
 import useImage from 'use-image';
 import Class from './Class'
 
@@ -19,12 +19,13 @@ const URLImage = ({ image }) => {
 };
 
 const Home = ({socket}) => {
-  const dragUrl = useRef();
+  const draggedItemRef = useRef();
   const stageRef = useRef();
   const [images, setImages] = useState([]);
+  const [classDefinitions, setClassDefinitions] = useState([]);
 
   useEffect(() => {
-    socket.on("diagram_persisted", data => setImages(JSON.parse(data).positions))   
+    socket.on("diagram_persisted", data => setClassDefinitions(JSON.parse(data).classDefinitions))   
 
     return () => socket.off('diagram_persisted')
   });
@@ -35,24 +36,39 @@ const Home = ({socket}) => {
           }))
   }, []);
 
-  const onDrop = e => {
+  const handleDrop = e => {
     // register event position
     stageRef.current.setPointersPositions(e);
 
     let request = {
       diagram: 
       {
-        positions: images.concat([
+        classDefinitions: (classDefinitions ?? []).concat([
           {
-            ...stageRef.current.getPointerPosition(),
-            src: "https://konvajs.org/assets/lion.png"
+            ...stageRef.current.getPointerPosition()
           }
         ])
       }
     }
 
-    socket.emit("request_issuedtrue", JSON.stringify(request))
+    socket.emit("request_issued", JSON.stringify(request))
   }
+
+  const handleDragEnd = index => e => {
+    let newState = [...classDefinitions]; // copying the old datas array
+    newState[index] = e
+
+    let request = {
+      diagram: 
+      {
+        classDefinitions: newState
+      }
+    }
+
+    socket.emit("request_issued", JSON.stringify(request))
+  }
+
+  const [linePoints, setLinePoints] = useState([450, 20, 900, 400]);
 
   return (
     <div>
@@ -63,11 +79,19 @@ const Home = ({socket}) => {
         src="https://konvajs.org/assets/lion.png"
         draggable="true"
         onDragStart={e => {
-          dragUrl.current = e.target.src;
+          draggedItemRef.current = 'lion';
         }}
       />
+      {/* <img
+        alt="sth"
+        src="https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
+        draggable="true"
+        onDragStart={e => {
+          draggedItemRef.current = 'newClass';
+        }}
+      /> */}
       <div
-        onDrop={e => onDrop(e)}
+        onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}
       >
         <Stage
@@ -77,12 +101,22 @@ const Home = ({socket}) => {
           ref={stageRef}
         >
           <Layer>
+            {classDefinitions && classDefinitions.map((classDefinition, index) => {
+              return <Class key={index} x={classDefinition.x} y={classDefinition.y} onDragend={handleDragEnd(index)} />
+            })}
 
-            <Class x={450} y={20} />
-            <Class x={900} y={400} />
+            {/* <Class x={450} y={20} onDragmove={e => setLinePoints(e)} />
+            <Class x={900} y={400} onDragmove={() => setLinePoints([460, 30, 900, 400])} /> */}
+            <Arrow
+              points={linePoints}
+              fill='white'
+              stroke='black'
+              strokeWidth={1} 
+              draggable
+            />
 
             {images.map(image => {
-              return <URLImage image={image} />;11
+              return <URLImage image={image} />;
             })}
           </Layer>
         </Stage>

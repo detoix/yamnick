@@ -39,6 +39,15 @@ namespace Contracts
     public class Diagram : Message
     {
         public List<Point> Positions { get; set; }
+        public List<ClassDefinition> ClassDefinitions { get; set; }
+    }
+
+    [Serializable]
+    public class ClassDefinition : Message
+    {
+        public string Name { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
     }
 
     [Serializable]
