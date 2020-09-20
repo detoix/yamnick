@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter, useParams, useHistory } from 'react-router-dom'   
 import { Stage, Group, Rect, Text, Circle, Line } from 'react-konva';
 
 const Class = props => {
@@ -13,7 +12,7 @@ const Class = props => {
   }
 
   const handleDragEnd = e => {
-    props.onDragend({
+    props.onDragEnd({
       x: e.target.attrs['x'],
       y: e.target.attrs['y']
     })
@@ -23,10 +22,8 @@ const Class = props => {
     <Group
       x={props.x}
       y={props.y}
-      width={width}
-      height={height}
       onDblclick={handleDoubleClick}
-      onDragend={handleDragEnd}
+      onDragEnd={handleDragEnd}
       draggable>
       <Rect
         x={0}

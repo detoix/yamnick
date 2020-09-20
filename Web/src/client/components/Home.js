@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom'
 import { Stage, Layer, Image, Line, Arrow } from 'react-konva';
 import useImage from 'use-image';
 import Class from './Class'
+import Relation from './Relation'
 
 const URLImage = ({ image }) => {
   const [img] = useImage(image.src);
@@ -19,10 +20,10 @@ const URLImage = ({ image }) => {
 };
 
 const Home = ({socket}) => {
-  const draggedItemRef = useRef();
-  const stageRef = useRef();
-  const [images, setImages] = useState([]);
-  const [classDefinitions, setClassDefinitions] = useState([]);
+  const draggedItemRef = useRef()
+  const stageRef = useRef()
+  const [images, setImages] = useState([])
+  const [classDefinitions, setClassDefinitions] = useState([])
 
   useEffect(() => {
     socket.on("diagram_persisted", data => setClassDefinitions(JSON.parse(data).classDefinitions))   
@@ -68,8 +69,6 @@ const Home = ({socket}) => {
     socket.emit("request_issued", JSON.stringify(request))
   }
 
-  const [linePoints, setLinePoints] = useState([450, 20, 900, 400]);
-
   return (
     <div>
       Try to trag and image into the stage:
@@ -82,14 +81,6 @@ const Home = ({socket}) => {
           draggedItemRef.current = 'lion';
         }}
       />
-      {/* <img
-        alt="sth"
-        src="https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
-        draggable="true"
-        onDragStart={e => {
-          draggedItemRef.current = 'newClass';
-        }}
-      /> */}
       <div
         onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}
@@ -101,19 +92,16 @@ const Home = ({socket}) => {
           ref={stageRef}
         >
           <Layer>
-            {classDefinitions && classDefinitions.map((classDefinition, index) => {
-              return <Class key={index} x={classDefinition.x} y={classDefinition.y} onDragend={handleDragEnd(index)} />
-            })}
+            {classDefinitions && classDefinitions.map((classDefinition, index) => 
+              <Class 
+                key={index} 
+                x={classDefinition.x} 
+                y={classDefinition.y} 
+                onDragEnd={handleDragEnd(index)} />)}
 
-            {/* <Class x={450} y={20} onDragmove={e => setLinePoints(e)} />
-            <Class x={900} y={400} onDragmove={() => setLinePoints([460, 30, 900, 400])} /> */}
-            <Arrow
-              points={linePoints}
-              fill='white'
-              stroke='black'
-              strokeWidth={1} 
-              draggable
-            />
+            <Relation 
+              points={[450, 20, 900, 400]}
+              classDefinitions={classDefinitions} />
 
             {images.map(image => {
               return <URLImage image={image} />;

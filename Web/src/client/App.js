@@ -15,19 +15,18 @@ const App = () => {
   useEffect(() => {
     const authorize = async () => {
       const socket = socketIOClient(window.location.origin)
+      socket.once('server_ready', () => {
+        setSocket(socket)
+      })
 
       if (!isAuthenticated)
       {
-        setSocket(socket)
         return
       }
 
       const token = await getTokenSilently();
       socket
         .emit('authenticate', { token: token })
-        .once('server_ready', () => {
-          setSocket(socket)
-        })
         .once('authenticated', () => {
           
         })
