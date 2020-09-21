@@ -38,8 +38,8 @@ namespace Contracts
     [Serializable]
     public class Diagram : Message
     {
-        public List<Point> Positions { get; set; }
         public List<ClassDefinition> ClassDefinitions { get; set; }
+        public List<Relation> Relations { get; set; }
     }
 
     [Serializable]
@@ -51,11 +51,24 @@ namespace Contracts
     }
 
     [Serializable]
+    public class Relation : Message
+    {
+        public Node Start { get; set; }
+        public Node End { get; set; }
+    }
+
+    [Serializable]
+    public class Node
+    {
+        public Point Point { get; set; }
+        public int StartEntityId { get; set; }
+    }
+
+    [Serializable]
     public class Point
     {
         public double X { get; set; }
         public double Y { get; set; }
-        public string Src { get; set; }
     }
 
     [Serializable]

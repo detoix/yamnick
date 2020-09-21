@@ -57,18 +57,34 @@ namespace CrawlersManager.Actors
                     {
                         System.Console.WriteLine($"Creating new diagram of {args.ReplyTo}");
 
-                        var diagram = args;
+                        var availableId = 1;
+                        foreach (var entity in args.ClassDefinitions)
+                        {
+                            entity.Id = availableId;
+                            availableId++;
+                        }
+
                         session.Store(args);
                         session.SaveChanges();
 
                         this.Sender.Tell(new Persisted<Diagram>()
                         {
-                            Content = diagram
+                            Content = args
                         });
                     }
                     else
                     {
-                        existingDiagram.Positions = args.Positions;
+                        var availableId = args.ClassDefinitions.Max(e => e.Id) + 1;
+
+                        foreach (var entity in args.ClassDefinitions)
+                        {
+                            if (entity.Id == 0)
+                            {
+                                entity.Id = availableId;
+                                availableId++;
+                            }
+                        }
+
                         existingDiagram.ClassDefinitions = args.ClassDefinitions;
 
                         session.Store(existingDiagram);

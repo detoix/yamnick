@@ -95,6 +95,7 @@ const Home = ({socket}) => {
             {classDefinitions && classDefinitions.map((classDefinition, index) => 
               <Class 
                 key={index} 
+                id={classDefinition.id}
                 x={classDefinition.x} 
                 y={classDefinition.y} 
                 onDragEnd={handleDragEnd(index)} />)}

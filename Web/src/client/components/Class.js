@@ -13,6 +13,7 @@ const Class = props => {
 
   const handleDragEnd = e => {
     props.onDragEnd({
+      id: props.id,
       x: e.target.attrs['x'],
       y: e.target.attrs['y']
     })
