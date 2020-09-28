@@ -1,32 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter } from 'react-router-dom'  
 import { Stage, Layer, Image, Line, Arrow } from 'react-konva';
-import useImage from 'use-image';
 import Class from './Class'
 import Relation from './Relation'
-
-const URLImage = ({ image }) => {
-  const [img] = useImage(image.src);
-  return (
-    <Image
-      image={img}
-      x={image.x}
-      y={image.y}
-      // I will use offset to set origin to the center of the image
-      offsetX={img ? img.width / 2 : 0}
-      offsetY={img ? img.height / 2 : 0}
-    />
-  );
-};
 
 const Home = ({socket}) => {
   const draggedItemRef = useRef()
   const stageRef = useRef()
-  const [images, setImages] = useState([])
-  const [classDefinitions, setClassDefinitions] = useState([])
+  const [entities, setEntities] = useState([])
+  const [relations, setRelations] = useState([])
 
   useEffect(() => {
-    socket.on("diagram_persisted", data => setClassDefinitions(JSON.parse(data).classDefinitions))   
+    socket.on("diagram_persisted", data => {
+      let content = JSON.parse(data)
+      setEntities(content.classDefinitions)
+      setRelations(content.relations)
+    })   
 
     return () => socket.off('diagram_persisted')
   });
@@ -38,31 +27,66 @@ const Home = ({socket}) => {
   }, []);
 
   const handleDrop = e => {
+    
     // register event position
     stageRef.current.setPointersPositions(e);
+    
+    let dropPosition = stageRef.current.getPointerPosition()
 
+    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [dropPosition])
+
+    let upToDateRelations = (relations ?? []).concat(draggedItemRef.current != 'relation' ? [] : [
+      {
+        start: {
+          point: {
+            x: dropPosition.x - 50,
+            y: dropPosition.y - 50
+          }
+        },
+        end: {
+          point: {
+            x: dropPosition.x + 50,
+            y: dropPosition.y + 50
+          }
+        }
+      }
+    ])
+    
     let request = {
       diagram: 
       {
-        classDefinitions: (classDefinitions ?? []).concat([
-          {
-            ...stageRef.current.getPointerPosition()
-          }
-        ])
+        classDefinitions: upToDateEntities,
+        relations: upToDateRelations
       }
     }
 
     socket.emit("request_issued", JSON.stringify(request))
   }
 
-  const handleDragEnd = index => e => {
-    let newState = [...classDefinitions]; // copying the old datas array
+  const handleEntityDragEnd = index => e => {
+    let newState = [...entities]; // copying the old datas array
     newState[index] = e
 
     let request = {
       diagram: 
       {
-        classDefinitions: newState
+        classDefinitions: newState,
+        relations: relations
+      }
+    }
+
+    socket.emit("request_issued", JSON.stringify(request))
+  }
+
+  const handleRelationDragEnd = index => e => {
+    let newState = [...relations]; // copying the old datas array
+    newState[index] = e
+
+    let request = {
+      diagram: 
+      {
+        classDefinitions: entities,
+        relations: newState
       }
     }
 
@@ -78,7 +102,15 @@ const Home = ({socket}) => {
         src="https://konvajs.org/assets/lion.png"
         draggable="true"
         onDragStart={e => {
-          draggedItemRef.current = 'lion';
+          draggedItemRef.current = 'entity';
+        }}
+      />
+      <img
+        alt="lion"
+        src="https://konvajs.org/assets/lion.png"
+        draggable="true"
+        onDragStart={e => {
+          draggedItemRef.current = 'relation';
         }}
       />
       <div
@@ -92,21 +124,24 @@ const Home = ({socket}) => {
           ref={stageRef}
         >
           <Layer>
-            {classDefinitions && classDefinitions.map((classDefinition, index) => 
+            {entities && entities.map((classDefinition, index) => 
               <Class 
                 key={index} 
                 id={classDefinition.id}
                 x={classDefinition.x} 
                 y={classDefinition.y} 
-                onDragEnd={handleDragEnd(index)} />)}
+                onDragEnd={handleEntityDragEnd(index)} />)}
 
-            <Relation 
-              points={[450, 20, 900, 400]}
-              classDefinitions={classDefinitions} />
+            {relations && relations.map((relation, index) => 
+              <Relation 
+                key={index} 
+                id={relation.id}
+                start={relation.start}
+                end={relation.end}
+                points={[relation.start.point.x, relation.start.point.y, relation.end.point.x, relation.end.point.y]}
+                entities={entities}
+                onDragEnd={handleRelationDragEnd(index)} />)}
 
-            {images.map(image => {
-              return <URLImage image={image} />;
-            })}
           </Layer>
         </Stage>
       </div>

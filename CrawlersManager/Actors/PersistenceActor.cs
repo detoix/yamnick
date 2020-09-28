@@ -86,6 +86,7 @@ namespace CrawlersManager.Actors
                         }
 
                         existingDiagram.ClassDefinitions = args.ClassDefinitions;
+                        existingDiagram.Relations = args.Relations;
 
                         session.Store(existingDiagram);
                         session.SaveChanges();

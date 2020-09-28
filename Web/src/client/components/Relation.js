@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Stage, Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
+import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
 
 const Relation = props => {
   const snapPointRadius = 15
-  const [coords, setCoords] = useState(props.points)
-  const [startsFrom, setStartsFrom] = useState(null)
-  const [endsOn, setEndsOn] = useState(null)
+  const [start, setStart] = useState(props.start)
+  const [end, setEnd] = useState(props.end)
 
   useEffect(() => {
-    let newState = [...coords]
 
-    let startEntity = props.classDefinitions.find(
-      classDefinition => classDefinition.id == startsFrom)
+    let startEntity = props.entities.find(
+      entity => entity.id == start.startEntityId)
 
     if (startEntity)
     {
-      newState[0] = startEntity.x
-      newState[1] = startEntity.y
+      setStart({
+        point: {
+          x: startEntity.x,
+          y: startEntity.y,
+        },
+        startEntityId: start.startEntityId
+      })
     }
 
-    let endEntity = props.classDefinitions.find(
-      classDefinition => classDefinition.id == endsOn)
+    let endEntity = props.entities.find(
+      entity => entity.id == end.startEntityId)
 
     if (endEntity)
     {
-      newState[2] = endEntity.x
-      newState[3] = endEntity.y
+      setEnd({
+        point: {
+          x: endEntity.x,
+          y: endEntity.y,
+        },
+        startEntityId: end.startEntityId
+      })
     }
 
-    setCoords(newState)
-
-  }, [props.classDefinitions]);
+  }, [props.entities]);
 
   const pointIsInSnapArea = (pointX, pointY, circleX, circleY) => {
     let radius = snapPointRadius
@@ -42,24 +48,31 @@ const Relation = props => {
     return false;
   }
 
+  const handleDragEnd = e => {
+    props.onDragEnd({
+      start: start,
+      end: end
+    })
+  }
+
   return (
     <Group>
       <Arrow
-        points={coords}
+        points={[start.point.x, start.point.y, end.point.x, end.point.y]}
         fill='white'
         stroke='black'
         strokeWidth={1}
       />
       <Circle
         draggable
-        x={coords[0]}
-        y={coords[1]}
+        x={start.point.x}
+        y={start.point.y}
         onDragMove={e => {
           let x = e.target.attrs['x']
           let y = e.target.attrs['y']
           let startsFromId = null
-          let result = props.classDefinitions.find(
-            classDefinition => pointIsInSnapArea(x, y, classDefinition.x, classDefinition.y))
+          let result = props.entities.find(
+            entity => pointIsInSnapArea(x, y, entity.x, entity.y))
 
           if (result)
           {
@@ -68,22 +81,28 @@ const Relation = props => {
             startsFromId = result.id
           }
 
-          setCoords([x, y, coords[2], coords[3]])
-          setStartsFrom(startsFromId)
+          setStart({
+            point: {
+              x: x,
+              y: y,
+            },
+            startEntityId: startsFromId
+          })
         }}
+        onDragEnd={handleDragEnd}
         opacity={0}
         radius={snapPointRadius}
       />
       <Circle
         draggable
-        x={coords[2]}
-        y={coords[3]}
+        x={end.point.x}
+        y={end.point.y}
         onDragMove={e => {
           let x = e.target.attrs['x']
           let y = e.target.attrs['y']
           let endsOnId = null
-          let result = props.classDefinitions.find(
-            classDefinition => pointIsInSnapArea(x, y, classDefinition.x, classDefinition.y))
+          let result = props.entities.find(
+            entity => pointIsInSnapArea(x, y, entity.x, entity.y))
 
           if (result)
           {
@@ -92,9 +111,15 @@ const Relation = props => {
             endsOnId = result.id
           }
 
-          setCoords([coords[0], coords[1], x, y])
-          setEndsOn(endsOnId)
+          setEnd({
+            point: {
+              x: x,
+              y: y,
+            },
+            startEntityId: endsOnId
+          })
         }}
+        onDragEnd={handleDragEnd}
         opacity={0}
         radius={snapPointRadius}
       />
