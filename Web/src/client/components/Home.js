@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter } from 'react-router-dom'  
 import { Stage, Layer, Image, Line, Arrow } from 'react-konva';
-import Class from './Class'
+import Entity from './Entity'
 import Relation from './Relation'
 
 const Home = ({socket}) => {
@@ -124,12 +124,12 @@ const Home = ({socket}) => {
           ref={stageRef}
         >
           <Layer>
-            {entities && entities.map((classDefinition, index) => 
-              <Class 
+            {entities && entities.map((entity, index) => 
+              <Entity 
                 key={index} 
-                id={classDefinition.id}
-                x={classDefinition.x} 
-                y={classDefinition.y} 
+                id={entity.id}
+                x={entity.x} 
+                y={entity.y} 
                 onDragEnd={handleEntityDragEnd(index)} />)}
 
             {relations && relations.map((relation, index) => 
@@ -138,7 +138,6 @@ const Home = ({socket}) => {
                 id={relation.id}
                 start={relation.start}
                 end={relation.end}
-                points={[relation.start.point.x, relation.start.point.y, relation.end.point.x, relation.end.point.y]}
                 entities={entities}
                 onDragEnd={handleRelationDragEnd(index)} />)}
 

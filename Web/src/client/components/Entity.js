@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Stage, Group, Rect, Text, Circle, Line } from 'react-konva';
 
-const Class = props => {
+const Entity = props => {
   const [name, setName] = useState('ClassName')
   const [height, setHeight] = useState(100)
   const [width, setWidth] = useState(150)
@@ -61,4 +61,4 @@ const Class = props => {
   )
 }
 
-export default Class
+export default Entity

@@ -74,7 +74,10 @@ namespace CrawlersManager.Actors
                     }
                     else
                     {
-                        var availableId = args.ClassDefinitions.Max(e => e.Id) + 1;
+                        var availableId = args.ClassDefinitions
+                            .Select(e => e.Id)
+                            .DefaultIfEmpty(0)
+                            .Max() + 1;
 
                         foreach (var entity in args.ClassDefinitions)
                         {

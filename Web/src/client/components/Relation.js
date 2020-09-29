@@ -7,36 +7,61 @@ const Relation = props => {
   const [end, setEnd] = useState(props.end)
 
   useEffect(() => {
+    trySnapById(setStart, props.start)
+  }, [props.start])
 
-    let startEntity = props.entities.find(
-      entity => entity.id == start.startEntityId)
+  useEffect(() => {
+    trySnapById(setEnd, props.end)
+  }, [props.end])
 
-    if (startEntity)
-    {
-      setStart({
-        point: {
-          x: startEntity.x,
-          y: startEntity.y,
-        },
-        startEntityId: start.startEntityId
-      })
-    }
-
-    let endEntity = props.entities.find(
-      entity => entity.id == end.startEntityId)
-
-    if (endEntity)
-    {
-      setEnd({
-        point: {
-          x: endEntity.x,
-          y: endEntity.y,
-        },
-        startEntityId: end.startEntityId
-      })
-    }
-
+  useEffect(() => {
+    trySnapById(setStart, start)
+    trySnapById(setEnd, end)
   }, [props.entities]);
+
+  const trySnapById = (setPoint, node) => {
+    let x = node.point.x
+    let y = node.point.y
+    let snapEntityId = 0
+    let snapEntity = props.entities.find(
+      entity => entity.id == node.startEntityId)
+
+    if (snapEntity)
+    {
+      x = snapEntity.x
+      y = snapEntity.y
+      snapEntityId = snapEntity.id
+    }
+
+    setPoint({
+      point: {
+        x: x,
+        y: y,
+      },
+      startEntityId: snapEntityId
+    })
+  }
+
+  const trySnapByPosition = (setPoint, x, y) => {
+    let snapEntityId = 0
+    let snapEntity = props.entities.find(
+      entity => pointIsInSnapArea(x, y, entity.x, entity.y))
+
+    if (snapEntity)
+    {
+      x = snapEntity.x
+      y = snapEntity.y
+      snapEntityId = snapEntity.id
+    }
+
+    setPoint({
+      point: {
+        x: x,
+        y: y,
+      },
+      startEntityId: snapEntityId
+    })
+  }
 
   const pointIsInSnapArea = (pointX, pointY, circleX, circleY) => {
     let radius = snapPointRadius
@@ -48,7 +73,7 @@ const Relation = props => {
     return false;
   }
 
-  const handleDragEnd = e => {
+  const commitUpdate = e => {
     props.onDragEnd({
       start: start,
       end: end
@@ -67,29 +92,9 @@ const Relation = props => {
         draggable
         x={start.point.x}
         y={start.point.y}
-        onDragMove={e => {
-          let x = e.target.attrs['x']
-          let y = e.target.attrs['y']
-          let startsFromId = null
-          let result = props.entities.find(
-            entity => pointIsInSnapArea(x, y, entity.x, entity.y))
-
-          if (result)
-          {
-            x = result.x
-            y = result.y
-            startsFromId = result.id
-          }
-
-          setStart({
-            point: {
-              x: x,
-              y: y,
-            },
-            startEntityId: startsFromId
-          })
-        }}
-        onDragEnd={handleDragEnd}
+        onDragMove={e => trySnapByPosition(
+          setStart, e.target.attrs['x'], e.target.attrs['y'])}
+        onDragEnd={commitUpdate}
         opacity={0}
         radius={snapPointRadius}
       />
@@ -97,29 +102,9 @@ const Relation = props => {
         draggable
         x={end.point.x}
         y={end.point.y}
-        onDragMove={e => {
-          let x = e.target.attrs['x']
-          let y = e.target.attrs['y']
-          let endsOnId = null
-          let result = props.entities.find(
-            entity => pointIsInSnapArea(x, y, entity.x, entity.y))
-
-          if (result)
-          {
-            x = result.x
-            y = result.y
-            endsOnId = result.id
-          }
-
-          setEnd({
-            point: {
-              x: x,
-              y: y,
-            },
-            startEntityId: endsOnId
-          })
-        }}
-        onDragEnd={handleDragEnd}
+        onDragMove={e => trySnapByPosition(
+          setEnd, e.target.attrs['x'], e.target.attrs['y'])}
+        onDragEnd={commitUpdate}
         opacity={0}
         radius={snapPointRadius}
       />
