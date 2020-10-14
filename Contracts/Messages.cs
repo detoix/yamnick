@@ -30,6 +30,12 @@ namespace Contracts
     }
 
     [Serializable]
+    public class NotFound<T> : Message
+    {
+        
+    }
+
+    [Serializable]
     public class QueryFor<T> : Message
     {
         

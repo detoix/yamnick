@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Contracts;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace CrawlersManager.Actors
@@ -9,6 +10,7 @@ namespace CrawlersManager.Actors
     class GatewayActor : ReceiveActor
     {
         private IActorRef PersistenceManager { get; }
+        private IDictionary<string, IActorRef> Diagrams { get; }
         private Send Send { get; }
 
         public GatewayActor(
@@ -16,6 +18,7 @@ namespace CrawlersManager.Actors
             Send send)
         {
             this.PersistenceManager = persistenceManager;
+            this.Diagrams = new Dictionary<string, IActorRef>();
             this.Send = send;
 
             this.Receive<TypedMessage>(args =>
@@ -41,20 +44,41 @@ namespace CrawlersManager.Actors
             this.Receive<QueryFor<Diagram>>(args =>
             {
                 System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
-                
-                this.PersistenceManager.Tell(args);
+
+                if (this.Diagrams.TryGetValue(args.ReplyTo, out var diagram))
+                {
+                    diagram.Tell(args);
+                }
+                else
+                {
+                    var newDiagram = Context.ActorOf(
+                        Props.Create<DiagramActor>(args.ReplyTo, this.PersistenceManager));
+                    this.Diagrams.Add(args.ReplyTo, newDiagram);
+                    newDiagram.Tell(args);
+                }
             });
 
             this.Receive<Diagram>(args => 
             {
                 System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                this.PersistenceManager.Tell(args);
+                if (this.Diagrams.TryGetValue(args.ReplyTo, out var diagram))
+                {
+                    diagram.Tell(args);
+                }
+                else
+                {
+                    var newDiagram = Context.ActorOf(
+                        Props.Create<DiagramActor>(args.ReplyTo, this.PersistenceManager));
+                    this.Diagrams.Add(args.ReplyTo, newDiagram);
+                    newDiagram.Tell(args);
+                }
             });
 
+            Context.Dispatcher.EventStream.Subscribe(this.Self, typeof(Persisted<Diagram>));
             this.Receive<Persisted<Diagram>>(args =>
             {
-                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.Content.ReplyTo}");
 
                 var message = JsonSerializer.Serialize(args.Content, new JsonSerializerOptions()
                 {

@@ -29,6 +29,8 @@ namespace CrawlersManager.Actors
                     if (existingDiagram is null)
                     {
                         System.Console.WriteLine($"Diagram of {args.ReplyTo} not found");
+
+                        this.Sender.Tell(new NotFound<Diagram>());
                     }
                     else
                     {
@@ -74,6 +76,8 @@ namespace CrawlersManager.Actors
                     }
                     else
                     {
+                        System.Console.WriteLine($"Found existing diagram of {args.ReplyTo}");
+
                         var availableId = args.ClassDefinitions
                             .Select(e => e.Id)
                             .DefaultIfEmpty(0)
