@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { withRouter } from 'react-router-dom'  
-import { Stage, Layer, Image, Line, Arrow } from 'react-konva';
+import { withRouter, useParams } from 'react-router-dom'  
+import { Stage, Layer } from 'react-konva';
+import { Toolbar, Button } from '@material-ui/core';
+import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
 import Relation from './Relation'
 
 const Home = ({socket}) => {
+  const { id } = useParams()
   const draggedItemRef = useRef()
   const stageRef = useRef()
   const [entities, setEntities] = useState([])
@@ -13,8 +16,10 @@ const Home = ({socket}) => {
   useEffect(() => {
     socket.on("diagram_persisted", data => {
       let content = JSON.parse(data)
-      setEntities(content.classDefinitions)
-      setRelations(content.relations)
+      if (content.id === idInt()) {
+        setEntities(content.classDefinitions)
+        setRelations(content.relations)
+      }
     })   
 
     return () => socket.off('diagram_persisted')
@@ -22,9 +27,11 @@ const Home = ({socket}) => {
 
   useEffect(() => {
     socket.emit("request_issued", JSON.stringify({
-            queryForDiagram: { }
+            queryForDiagram: { id: idInt() }
           }))
   }, []);
+
+  const idInt = () => Number(id)
 
   const handleDrop = e => {
     
@@ -55,6 +62,7 @@ const Home = ({socket}) => {
     let request = {
       diagram: 
       {
+        id: idInt(),
         classDefinitions: upToDateEntities,
         relations: upToDateRelations
       }
@@ -70,6 +78,7 @@ const Home = ({socket}) => {
     let request = {
       diagram: 
       {
+        id: idInt(),
         classDefinitions: newState,
         relations: relations
       }
@@ -85,6 +94,7 @@ const Home = ({socket}) => {
     let request = {
       diagram: 
       {
+        id: idInt(),
         classDefinitions: entities,
         relations: newState
       }
@@ -95,24 +105,26 @@ const Home = ({socket}) => {
 
   return (
     <div>
-      Try to trag and image into the stage:
-      <br />
-      <img
-        alt="lion"
-        src="https://konvajs.org/assets/lion.png"
-        draggable="true"
-        onDragStart={e => {
-          draggedItemRef.current = 'entity';
-        }}
-      />
-      <img
-        alt="lion"
-        src="https://konvajs.org/assets/lion.png"
-        draggable="true"
-        onDragStart={e => {
-          draggedItemRef.current = 'relation';
-        }}
-      />
+      <Toolbar>
+        <Button
+          disableRipple="true"
+          draggable="true"
+          onDragStart={e => {
+            draggedItemRef.current = 'entity';
+          }}>
+          <Class />
+          Entity
+        </Button>
+        <Button
+          disableRipple="true"
+          draggable="true"
+          onDragStart={e => {
+            draggedItemRef.current = 'relation';
+          }}>
+          <ArrowRightAlt />
+          Relation
+        </Button>
+      </Toolbar>
       <div
         onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}

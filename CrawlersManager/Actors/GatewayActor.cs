@@ -10,15 +10,15 @@ namespace CrawlersManager.Actors
     class GatewayActor : ReceiveActor
     {
         private IActorRef PersistenceManager { get; }
-        private IDictionary<string, IActorRef> Diagrams { get; }
+        private IDictionary<int, IActorRef> Diagrams { get; }
         private Send Send { get; }
 
         public GatewayActor(
             IActorRef persistenceManager,
             Send send)
         {
+            this.Diagrams = new Dictionary<int, IActorRef>();
             this.PersistenceManager = persistenceManager;
-            this.Diagrams = new Dictionary<string, IActorRef>();
             this.Send = send;
 
             this.Receive<TypedMessage>(args =>
@@ -45,15 +45,15 @@ namespace CrawlersManager.Actors
             {
                 System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                if (this.Diagrams.TryGetValue(args.ReplyTo, out var diagram))
+                if (this.Diagrams.TryGetValue(args.Id, out var diagram))
                 {
                     diagram.Tell(args);
                 }
                 else
                 {
                     var newDiagram = Context.ActorOf(
-                        Props.Create<DiagramActor>(args.ReplyTo, this.PersistenceManager));
-                    this.Diagrams.Add(args.ReplyTo, newDiagram);
+                        Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
+                    this.Diagrams.Add(args.Id, newDiagram);
                     newDiagram.Tell(args);
                 }
             });
@@ -62,15 +62,15 @@ namespace CrawlersManager.Actors
             {
                 System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                if (this.Diagrams.TryGetValue(args.ReplyTo, out var diagram))
+                if (this.Diagrams.TryGetValue(args.Id, out var diagram))
                 {
                     diagram.Tell(args);
                 }
                 else
                 {
                     var newDiagram = Context.ActorOf(
-                        Props.Create<DiagramActor>(args.ReplyTo, this.PersistenceManager));
-                    this.Diagrams.Add(args.ReplyTo, newDiagram);
+                        Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
+                    this.Diagrams.Add(args.Id, newDiagram);
                     newDiagram.Tell(args);
                 }
             });

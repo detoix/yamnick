@@ -5,13 +5,13 @@ namespace CrawlersManager.Actors
 {
     class DiagramActor : ReceiveActor, IWithUnboundedStash
     {
-        private string PersistenceId { get; }
+        private int PersistenceId { get; }
         private IActorRef PersistenceManager { get; }
         private Diagram State { get; set; }
         public IStash Stash { get; set; }
 
         public DiagramActor(
-            string persistenceId,
+            int persistenceId,
             IActorRef persistenceManager)
         {
             this.PersistenceId = persistenceId;
@@ -78,7 +78,7 @@ namespace CrawlersManager.Actors
 
             this.PersistenceManager.Tell(new QueryFor<Diagram>()
             {
-                ReplyTo = this.PersistenceId
+                Id = this.PersistenceId
             });
         }
     }

@@ -23,18 +23,18 @@ namespace CrawlersManager.Actors
                 {
                     var existingDiagram = session
                         .Query<Diagram>()
-                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .Where(x => x.Id == args.Id)
                         .SingleOrDefault();
 
                     if (existingDiagram is null)
                     {
-                        System.Console.WriteLine($"Diagram of {args.ReplyTo} not found");
+                        System.Console.WriteLine($"Diagram of Id {args.Id} not found");
 
                         this.Sender.Tell(new NotFound<Diagram>());
                     }
                     else
                     {
-                        System.Console.WriteLine($"Diagram of {args.ReplyTo} found, forwarding...");
+                        System.Console.WriteLine($"Diagram of Id {args.Id} found, forwarding...");
 
                         this.Sender.Tell(new Persisted<Diagram>()
                         {
@@ -52,7 +52,7 @@ namespace CrawlersManager.Actors
                 {
                     var existingDiagram = session
                         .Query<Diagram>()
-                        .Where(x => x.ReplyTo == args.ReplyTo)
+                        .Where(x => x.Id == args.Id)
                         .SingleOrDefault();
                     
                     if (existingDiagram is null)
