@@ -4,12 +4,12 @@ using System.Text;
 using System.Text.Json;
 using Akka.Actor;
 using Contracts;
-using CrawlersManager.Actors;
+using Application.Actors;
 using Marten;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace CrawlersManager
+namespace Application
 {
     class Program
     {
@@ -23,22 +23,22 @@ namespace CrawlersManager
             using (var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             {
-                Send send = (chanell, message, replyTo) =>
+                Send send = (channelName, message, replyTo) =>
                 {
                     var props = channel.CreateBasicProperties();
                     if (!string.IsNullOrEmpty(replyTo))
                         props.ReplyTo = replyTo;
                     channel.BasicPublish(
                         exchange: string.Empty,
-                        routingKey: chanell,
+                        routingKey: channelName,
                         basicProperties: props,
                         body: Encoding.UTF8.GetBytes(message));
                 };
 
                 var persistenceManager = system.ActorOf(
-                    Props.Create<PersistenceManager>(store));
+                    Props.Create<PersistenceActor>(store));
                 var coordinator = system.ActorOf(
-                    Props.Create<CrawlersCoordinator>(persistenceManager, send));
+                    Props.Create<GatewayActor>(persistenceManager, send));
                 var router = new EventingBasicConsumer(channel);
                 router.Received += (model, ea) => 
                 {
@@ -51,8 +51,10 @@ namespace CrawlersManager
                     message.ReplyTo = ea.BasicProperties.ReplyTo;
                     coordinator.Tell(message);
                 };
+                var taskQueueName = "task_queue";
+                channel.QueueDeclare(taskQueueName, durable: true);
                 channel.BasicConsume(
-                    queue: "ClientCommands", 
+                    queue: taskQueueName, 
                     autoAck: true,
                     consumer: router);
 

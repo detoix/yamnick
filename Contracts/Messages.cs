@@ -11,18 +11,6 @@ namespace Contracts
     }
 
     [Serializable]
-    public class User : Message
-    {
-        public List<CrawlCommand> QueriesWithResults { get; set; }
-    }
-
-    [Serializable]
-    public class RemoveQuery : Message
-    {
-        public CrawlResults CrawlResults { get; set; }
-    }
-
-    [Serializable]
     public class QueryRemoved : Message
     {
         
@@ -31,33 +19,62 @@ namespace Contracts
     [Serializable]
     public class TypedMessage : Message
     {
-        public QueryForUser QueryForUser { get; set; }
-        public CrawlCommand CrawlCommand { get; set; }
-        public CrawlResults CrawlResults { get; set; }
-        public RemoveQuery RemoveQuery { get; set; }
+        public QueryFor<Diagram> QueryForDiagram { get; set; }
+        public Diagram Diagram { get; set; }
     }
 
     [Serializable]
-    public class CrawlCommand : Message
+    public class Persisted<T> : Message
     {
-        public string StartUrl { get; set; }
-        public string[] Follow { get; set; }
-        public string[] Collect { get; set; }
-        public List<CrawlResults> CrawlResults { get; set; }
+        public T Content { get; set; }
     }
 
     [Serializable]
-    public class CrawlResults : Message
+    public class NotFound<T> : Message
     {
-        public CrawlResult[] Results { get; set; }
+        
     }
 
     [Serializable]
-    public class CrawlResult : Message
+    public class QueryFor<T> : Message
     {
-        public string On { get; set; }
-        public string From { get; set; }
-        public string Found { get; set; }
+        
+    }
+
+    [Serializable]
+    public class Diagram : Message
+    {
+        public List<ClassDefinition> ClassDefinitions { get; set; }
+        public List<Relation> Relations { get; set; }
+    }
+
+    [Serializable]
+    public class ClassDefinition : Message
+    {
+        public string Name { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
+
+    [Serializable]
+    public class Relation : Message
+    {
+        public Node Start { get; set; }
+        public Node End { get; set; }
+    }
+
+    [Serializable]
+    public class Node
+    {
+        public Point Point { get; set; }
+        public int StartEntityId { get; set; }
+    }
+
+    [Serializable]
+    public class Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
     }
 
     [Serializable]

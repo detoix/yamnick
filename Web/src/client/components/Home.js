@@ -1,106 +1,163 @@
-import React, { useState, useEffect } from 'react';
-import { Link, withRouter } from 'react-router-dom'   
-import { Button, FormControl, InputLabel, Input,
-  IconButton, Card, CardContent, CardActions,
-  FormGroup, Grid, Typography} from '@material-ui/core';
-import { Delete, Launch } from '@material-ui/icons'
-import { useStyles } from "../utils/useStyles";
+import React, { useState, useRef, useEffect } from 'react';
+import { withRouter, useParams } from 'react-router-dom'  
+import { Stage, Layer } from 'react-konva';
+import { Toolbar, Button } from '@material-ui/core';
+import { Class, ArrowRightAlt } from '@material-ui/icons'
+import Entity from './Entity'
+import Relation from './Relation'
 
 const Home = ({socket}) => {
-  const [queriesData, setQueriesData] = useState(null)
-  const [startUrl, setStartUrl] = useState('https://www.bankier.pl/wiadomosc/95')
-  const [follow, setFollow] = useState('a.next.btn, span.entry-title a')
-  const [collect, setCollect] = useState('span.entry-title, span.lead')
-  const classes = useStyles();
+  const { id } = useParams()
+  const draggedItemRef = useRef()
+  const stageRef = useRef()
+  const [entities, setEntities] = useState([])
+  const [relations, setRelations] = useState([])
 
   useEffect(() => {
-    socket
-      .on("response_received", data => {
-        setQueriesData(JSON.parse(data))
-      })
-      .emit("query_issued", JSON.stringify({
-        queryForUser: { }
-      }))
+    socket.on("diagram_persisted", data => {
+      let content = JSON.parse(data)
+      if (content.id === idInt()) {
+        setEntities(content.classDefinitions)
+        setRelations(content.relations)
+      }
+    })   
 
-    return () => socket.off('response_received')
+    return () => socket.off('diagram_persisted')
+  });
+
+  useEffect(() => {
+    socket.emit("request_issued", JSON.stringify({
+            queryForDiagram: { id: idInt() }
+          }))
   }, []);
 
-  const handleSubmit = () => {
-    let crawlRequest = {
-      crawlCommand: 
+  const idInt = () => Number(id)
+
+  const handleDrop = e => {
+    
+    // register event position
+    stageRef.current.setPointersPositions(e);
+    
+    let dropPosition = stageRef.current.getPointerPosition()
+
+    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [dropPosition])
+
+    let upToDateRelations = (relations ?? []).concat(draggedItemRef.current != 'relation' ? [] : [
       {
-        startUrl: startUrl,
-        follow: follow.split(','),
-        collect: collect.split(',')
+        start: {
+          point: {
+            x: dropPosition.x - 50,
+            y: dropPosition.y - 50
+          }
+        },
+        end: {
+          point: {
+            x: dropPosition.x + 50,
+            y: dropPosition.y + 50
+          }
+        }
+      }
+    ])
+    
+    let request = {
+      diagram: 
+      {
+        id: idInt(),
+        classDefinitions: upToDateEntities,
+        relations: upToDateRelations
       }
     }
 
-    socket.emit("query_issued", JSON.stringify(crawlRequest))
+    socket.emit("request_issued", JSON.stringify(request))
   }
 
-  const remove = id => {
-    let removeQuery = {
-      removeQuery: 
+  const handleEntityDragEnd = index => e => {
+    let newState = [...entities]; // copying the old datas array
+    newState[index] = e
+
+    let request = {
+      diagram: 
       {
-        id: id
+        id: idInt(),
+        classDefinitions: newState,
+        relations: relations
       }
     }
-    socket.emit("query_issued", JSON.stringify(removeQuery))
+
+    socket.emit("request_issued", JSON.stringify(request))
+  }
+
+  const handleRelationDragEnd = index => e => {
+    let newState = [...relations]; // copying the old datas array
+    newState[index] = e
+
+    let request = {
+      diagram: 
+      {
+        id: idInt(),
+        classDefinitions: entities,
+        relations: newState
+      }
+    }
+
+    socket.emit("request_issued", JSON.stringify(request))
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={6}>
-        <Card>
-          <CardContent>
-            <FormGroup className={classes.root}>
-              <FormControl>
-                <InputLabel>Start crawling on</InputLabel>
-                <Input value={startUrl} onChange={e => setStartUrl(e.target.value)} />
-              </FormControl>
-              <FormControl>
-                <InputLabel>Follow</InputLabel>
-                <Input value={follow} onChange={e => setFollow(e.target.value)} />
-              </FormControl>
-              <FormControl>
-                <InputLabel>Collect</InputLabel>
-                <Input value={collect} onChange={e => setCollect(e.target.value)} />
-              </FormControl>
-              <Button variant="contained" color="primary" onClick={() => handleSubmit()}>Submit</Button>
-            </FormGroup>
-          </CardContent>
-        </Card>
-      </Grid>
+    <div>
+      <Toolbar>
+        <Button
+          disableRipple="true"
+          draggable="true"
+          onDragStart={e => {
+            draggedItemRef.current = 'entity';
+          }}>
+          <Class />
+          Entity
+        </Button>
+        <Button
+          disableRipple="true"
+          draggable="true"
+          onDragStart={e => {
+            draggedItemRef.current = 'relation';
+          }}>
+          <ArrowRightAlt />
+          Relation
+        </Button>
+      </Toolbar>
+      <div
+        onDrop={e => handleDrop(e)}
+        onDragOver={e => e.preventDefault()}
+      >
+        <Stage
+          width={window.innerWidth}
+          height={window.innerHeight}
+          style={{ border: '1px solid grey' }}
+          ref={stageRef}
+        >
+          <Layer>
+            {entities && entities.map((entity, index) => 
+              <Entity 
+                key={index} 
+                id={entity.id}
+                x={entity.x} 
+                y={entity.y} 
+                onDragEnd={handleEntityDragEnd(index)} />)}
 
-      {queriesData && queriesData.queriesWithResults.map(queryWithResults => 
-        <Grid item xs={6} key={queryWithResults.id}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Query No {queryWithResults.id}
-              </Typography>
-              <Typography variant="h5" component="h2">
-                Started on {queryWithResults.startUrl}
-              </Typography>
-              <Typography color="textSecondary">
-                Results from {queryWithResults.crawlResults.length} runs
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Link to={'/query/' + queryWithResults.id}>
-                <IconButton>
-                  <Launch />
-                </IconButton>
-              </Link>
-              <IconButton onClick={() => remove(queryWithResults.id)}>
-                <Delete />
-              </IconButton>
-            </CardActions>
-          </Card>
-        </Grid>
-      )}
-    </Grid>
+            {relations && relations.map((relation, index) => 
+              <Relation 
+                key={index} 
+                id={relation.id}
+                start={relation.start}
+                end={relation.end}
+                entities={entities}
+                onDragEnd={handleRelationDragEnd(index)} />)}
+
+          </Layer>
+        </Stage>
+      </div>
+    </div>
   );
-}
+};
 
 export default withRouter(Home)

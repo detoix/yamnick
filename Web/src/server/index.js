@@ -34,14 +34,14 @@ const openConnectionBetween = (socket, amqpConnection) => {
                 let message = msg.content.toString()
                 console.log("Server received response of length:", message.length);
                 for (let s of sockets[socket.decoded_token.sub]) {
-                    s.emit("response_received", message)
+                    s.emit("diagram_persisted", message)
                     console.log("Message emitted to client")
                 }
             }, { noAck: true });
 
-            socket.on("query_issued", (data) => {
-                console.log("Server received query of", data)
-                channel.sendToQueue('ClientCommands', Buffer.from(data), { replyTo: socket.decoded_token.sub });
+            socket.on("request_issued", (data) => {
+                console.log("Server forwarding request of", data)
+                channel.sendToQueue('task_queue', Buffer.from(data), { replyTo: socket.decoded_token.sub })
             });
 
             socket.emit("server_ready")
@@ -61,7 +61,8 @@ amqp.connect(process.env.AMQP, function(error0, amqpConnection) {
     if (error0) {
         throw error0;
     }
-    if (process.env.DEV) {
+    // if (process.env.DEV) { //TODO: use when user can create account
+    if (true) {
         io.on('connection', socket => {
             socket.decoded_token = {
                 sub: "dupa1"
