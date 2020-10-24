@@ -29,7 +29,7 @@ const Home = ({socket}) => {
     socket.emit("request_issued", JSON.stringify({
             queryForDiagram: { id: idInt() }
           }))
-  }, []);
+  }, [id]);
 
   const idInt = () => Number(id)
 
@@ -107,7 +107,7 @@ const Home = ({socket}) => {
     <div>
       <Toolbar>
         <Button
-          disableRipple="true"
+          disableRipple={true}
           draggable="true"
           onDragStart={e => {
             draggedItemRef.current = 'entity';
@@ -116,7 +116,7 @@ const Home = ({socket}) => {
           Entity
         </Button>
         <Button
-          disableRipple="true"
+          disableRipple={true}
           draggable="true"
           onDragStart={e => {
             draggedItemRef.current = 'relation';
