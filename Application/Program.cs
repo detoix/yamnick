@@ -51,7 +51,7 @@ namespace Application
                     message.ReplyTo = ea.BasicProperties.ReplyTo;
                     coordinator.Tell(message);
                 };
-                var taskQueueName = "task_queue";
+                var taskQueueName = "app_mailbox";
                 channel.QueueDeclare(taskQueueName, durable: true);
                 channel.BasicConsume(
                     queue: taskQueueName, 

@@ -38,22 +38,17 @@ const App = () => {
     }
   }, [loading, getTokenSilently]);
 
-  if (!socket)
-  {
-    return <div>Loading...</div> 
-  }
-
   return (
     <Router history={history}>
       <NavBar />
-      <Container style={{ padding: 20 }}>
+      {socket && <Container style={{ padding: 20 }}>
         <Switch>
           <Route exact path='/' render={(props) => <Home {...props} socket={socket} />} />
           <Route path='/diagram/:id' render={(props) => <Home {...props} socket={socket} />} />
         </Switch>
-      </Container>
+      </Container>}
     </Router>
-  );
+  )
 }
 
 export default App

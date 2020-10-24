@@ -85,7 +85,7 @@ namespace Application.Actors
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                this.Send(args.Content.ReplyTo, message, string.Empty);
+                this.Send("web_mailbox", message, string.Empty);
             });
         }
     }
