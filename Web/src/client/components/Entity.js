@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Stage, Group, Rect, Text, Circle, Line } from 'react-konva';
+import { Group, Rect, Text, Circle, Line } from 'react-konva';
 
 const Entity = props => {
-  const [name, setName] = useState('ClassName')
   const [height, setHeight] = useState(100)
   const [width, setWidth] = useState(150)
   const [fields, setFields] = useState(['dupa1', 'dupa2'])
 
   const handleDoubleClick = e => {
-    setName('xd')
+    props.openModal()
   }
 
   const handleDragEnd = e => {
-    props.onDragEnd({
-      id: props.id,
-      x: e.target.attrs['x'],
-      y: e.target.attrs['y']
-    })
+    let clone = {...props.state}
+    clone.x = e.target.attrs['x']
+    clone.y = e.target.attrs['y']
+    props.onDragEnd(clone)
   }
 
   return (
     <Group
-      x={props.x}
-      y={props.y}
+      x={props.state.x}
+      y={props.state.y}
       onDblclick={handleDoubleClick}
       onDragEnd={handleDragEnd}
       draggable>
@@ -46,7 +44,7 @@ const Entity = props => {
         x={0}
         y={0} 
         width={width}
-        text={name} 
+        text={props.state.name} 
         fontSize={15}
         align='center'
       />

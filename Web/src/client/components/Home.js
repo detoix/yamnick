@@ -4,12 +4,14 @@ import { Stage, Layer } from 'react-konva';
 import { Toolbar, Button } from '@material-ui/core';
 import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
+import EntityEditor from './EntityEditor'
 import Relation from './Relation'
 
 const Home = ({socket}) => {
   const { id } = useParams()
   const draggedItemRef = useRef()
   const stageRef = useRef()
+  const [editable, setEditable] = useState(null)
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
 
@@ -71,6 +73,17 @@ const Home = ({socket}) => {
     socket.emit("request_issued", JSON.stringify(request))
   }
 
+  const openModal = index => e => {
+    setEditable(entities[index])
+  }
+
+  const onModalClosed = (entityToUpdate) => {
+    let indexOfEntity = entities.findIndex(
+      e => e.id == entityToUpdate.id)
+    handleEntityDragEnd(indexOfEntity)(entityToUpdate)
+    setEditable(null);
+  };
+
   const handleEntityDragEnd = index => e => {
     let newState = [...entities]; // copying the old datas array
     newState[index] = e
@@ -125,6 +138,10 @@ const Home = ({socket}) => {
           Relation
         </Button>
       </Toolbar>
+      {editable && <EntityEditor
+        editable={editable}
+        handleClose={onModalClosed}
+      />}
       <div
         onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}
@@ -139,9 +156,8 @@ const Home = ({socket}) => {
             {entities && entities.map((entity, index) => 
               <Entity 
                 key={index} 
-                id={entity.id}
-                x={entity.x} 
-                y={entity.y} 
+                state={entity}
+                openModal={openModal(index)}
                 onDragEnd={handleEntityDragEnd(index)} />)}
 
             {relations && relations.map((relation, index) => 
