@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Circle, Line } from 'react-konva';
 
 const Entity = props => {
-  const [height, setHeight] = useState(100)
-  const [width, setWidth] = useState(150)
   const [fields, setFields] = useState(['dupa1', 'dupa2'])
 
-  const handleDoubleClick = e => {
-    props.openModal()
-  }
+  const handleDoubleClick = e => props.openModal()
 
   const handleDragEnd = e => {
     let clone = {...props.state}
@@ -27,23 +23,23 @@ const Entity = props => {
       <Rect
         x={0}
         y={0}
-        width={width}
-        height={height / 2}
+        width={props.state.width}
+        height={props.state.height / 2}
         stroke='black'
         strokeWidth={1}
       />
       <Rect
         x={0}
-        y={height / 2}
-        width={width}
-        height={height / 2}
+        y={props.state.height / 2}
+        width={props.state.width}
+        height={props.state.height / 2}
         stroke='black'
         strokeWidth={1}
       />
       <Text
         x={0}
         y={0} 
-        width={width}
+        width={props.state.width}
         text={props.state.name} 
         fontSize={15}
         align='center'
@@ -51,7 +47,7 @@ const Entity = props => {
       {fields.map((field, index) => 
         <Text 
           x={0}
-          y={height / 2 + index * 15} 
+          y={props.state.height / 2 + index * 15} 
           key={index} 
           text={'+ field: ' + field} 
         />)}

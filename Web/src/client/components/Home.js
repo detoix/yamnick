@@ -6,6 +6,7 @@ import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
+import ExtendedEntity from '../utils/ExtendedEntity'
 
 const Home = ({socket}) => {
   const { id } = useParams()
@@ -19,7 +20,8 @@ const Home = ({socket}) => {
     socket.on("diagram_persisted", data => {
       let content = JSON.parse(data)
       if (content.id === idInt()) {
-        setEntities(content.classDefinitions)
+        setEntities(content.classDefinitions
+          .map(e => new ExtendedEntity(e)))
         setRelations(content.relations)
       }
     })   

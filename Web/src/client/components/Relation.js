@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
+import { snapPointRadius } from '../utils/Consts'
 
 const Relation = props => {
-  const snapPointRadius = 15
   const [start, setStart] = useState(props.start)
   const [end, setEnd] = useState(props.end)
 
@@ -44,15 +44,15 @@ const Relation = props => {
 
   const trySnapByPosition = (setPoint, x, y) => {
     let snapEntityId = 0
-    let snapEntity = props.entities.find(
-      entity => pointIsInSnapArea(x, y, entity.x, entity.y))
 
-    if (snapEntity)
-    {
-      x = snapEntity.x
-      y = snapEntity.y
-      snapEntityId = snapEntity.id
-    }
+    props.entities.forEach(entity => {
+      let snapPoint = entity.pointCloseTo(x, y)
+      if (snapPoint) {
+        x = snapPoint.x
+        y = snapPoint.y
+        snapEntityId = entity.id
+      }
+    })
 
     setPoint({
       point: {
@@ -61,16 +61,6 @@ const Relation = props => {
       },
       startEntityId: snapEntityId
     })
-  }
-
-  const pointIsInSnapArea = (pointX, pointY, circleX, circleY) => {
-    let radius = snapPointRadius
-    let dist_points = (pointX - circleX) * (pointX - circleX) + (pointY - circleY) * (pointY - circleY);
-    radius *= radius;
-    if (dist_points < radius) {
-        return true;
-    }
-    return false;
   }
 
   const commitUpdate = e => {
