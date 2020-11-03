@@ -67,7 +67,7 @@ namespace Contracts
     public class Node
     {
         public Point Point { get; set; }
-        public int StartEntityId { get; set; }
+        public EntityHandle EntityHandle { get; set; }
     }
 
     [Serializable]
@@ -75,6 +75,13 @@ namespace Contracts
     {
         public double X { get; set; }
         public double Y { get; set; }
+    }
+
+    [Serializable]
+    public class EntityHandle
+    {
+        public int EntityId { get; set; }
+        public int SnapNodeId { get; set; }
     }
 
     [Serializable]

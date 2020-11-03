@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Group, Rect, Text, Circle, Line } from 'react-konva';
+import { Group, Rect, Text, Image, Line } from 'react-konva';
+import useImage from 'use-image'
+import lion from '../../../public/lion.png'
 
 const Entity = props => {
-  const [fields, setFields] = useState(['dupa1', 'dupa2'])
+  const [image] = useImage(lion);
+  const [fields, setFields] = useState(['dupa1', 'dupa1'])
 
   const handleDoubleClick = e => props.openModal()
 
@@ -51,6 +54,13 @@ const Entity = props => {
           key={index} 
           text={'+ field: ' + field} 
         />)}
+      <Image 
+        image={image}
+        x={props.state.width - 50}
+        y={-45}
+        scaleX={0.35}
+        scaleY={0.35}
+      />
     </Group>
   )
 }

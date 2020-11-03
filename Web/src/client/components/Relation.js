@@ -20,46 +20,60 @@ const Relation = props => {
   }, [props.entities]);
 
   const trySnapById = (setPoint, node) => {
-    let x = node.point.x
-    let y = node.point.y
-    let snapEntityId = 0
-    let snapEntity = props.entities.find(
-      entity => entity.id == node.startEntityId)
-
-    if (snapEntity)
-    {
-      x = snapEntity.x
-      y = snapEntity.y
-      snapEntityId = snapEntity.id
+    let newSnapPoint = {
+      x: node.point.x,
+      y: node.point.y,
+    }
+    let snapEntityHandle = {
+      entityId: 0,
+      snapNodeId: 0
     }
 
-    setPoint({
-      point: {
-        x: x,
-        y: y,
-      },
-      startEntityId: snapEntityId
-    })
+    if (node.entityHandle) {
+
+      let snapEntity = props.entities.find(
+        entity => entity.id == node.entityHandle.entityId)
+  
+      if (snapEntity)
+      {
+        newSnapPoint = snapEntity.edgePoints[node.entityHandle.snapNodeId]
+        snapEntityHandle = {
+          entityId: snapEntity.id,
+          snapNodeId: node.entityHandle.snapNodeId
+        }
+      }
+  
+      setPoint({
+        point: newSnapPoint,
+        entityHandle: snapEntityHandle
+      })
+    }   
   }
 
   const trySnapByPosition = (setPoint, x, y) => {
-    let snapEntityId = 0
+    let newSnapPoint = {
+      x: x,
+      y: y,
+    }
+    let snapEntityHandle = {
+      entityId: 0,
+      snapNodeId: 0
+    }
 
     props.entities.forEach(entity => {
-      let snapPoint = entity.pointCloseTo(x, y)
-      if (snapPoint) {
-        x = snapPoint.x
-        y = snapPoint.y
-        snapEntityId = entity.id
+      let [foundSnapPoint, indexOfSnapPoint] = entity.pointCloseTo(x, y)
+      if (foundSnapPoint) {
+        newSnapPoint = foundSnapPoint
+        snapEntityHandle = {
+          entityId: entity.id,
+          snapNodeId: indexOfSnapPoint
+        }
       }
     })
 
     setPoint({
-      point: {
-        x: x,
-        y: y,
-      },
-      startEntityId: snapEntityId
+      point: newSnapPoint,
+      entityHandle: snapEntityHandle
     })
   }
 
