@@ -12,9 +12,9 @@ const Home = ({socket}) => {
   const { id } = useParams()
   const draggedItemRef = useRef()
   const stageRef = useRef()
-  const [editable, setEditable] = useState(null)
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
+  const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
 
   useEffect(() => {
     socket.on("diagram_persisted", data => {
@@ -75,15 +75,22 @@ const Home = ({socket}) => {
     socket.emit("request_issued", JSON.stringify(request))
   }
 
-  const openModal = index => e => {
-    setEditable(entities[index])
+  const openRenderEntityEditor = index => e => {
+    setMaybeEntityEditor(() => props => {
+      return <EntityEditor
+        editable={entities[index]}
+        handleClose={onModalClosed}
+      />
+    })
   }
+
+  const closeRenderEntityEditor = () => setMaybeEntityEditor(() => props => null)
 
   const onModalClosed = (entityToUpdate) => {
     let indexOfEntity = entities.findIndex(
       e => e.id == entityToUpdate.id)
     handleEntityDragEnd(indexOfEntity)(entityToUpdate)
-    setEditable(null);
+    closeRenderEntityEditor()
   };
 
   const handleEntityDragEnd = index => e => {
@@ -140,10 +147,7 @@ const Home = ({socket}) => {
           Relation
         </Button>
       </Toolbar>
-      {editable && <EntityEditor
-        editable={editable}
-        handleClose={onModalClosed}
-      />}
+      <MaybeEntityEditor />
       <div
         onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}
@@ -159,8 +163,8 @@ const Home = ({socket}) => {
               <Entity 
                 key={index} 
                 state={entity}
-                openModal={openModal(index)}
-                onDragEnd={handleEntityDragEnd(index)} />)}
+                openModal={openRenderEntityEditor(index)}
+                commitUpdate={handleEntityDragEnd(index)} />)}
 
             {relations && relations.map((relation, index) => 
               <Relation 
@@ -169,7 +173,7 @@ const Home = ({socket}) => {
                 start={relation.start}
                 end={relation.end}
                 entities={entities}
-                onDragEnd={handleRelationDragEnd(index)} />)}
+                commitUpdate={handleRelationDragEnd(index)} />)}
 
           </Layer>
         </Stage>

@@ -9,11 +9,11 @@ const Entity = props => {
 
   const handleDoubleClick = e => props.openModal()
 
-  const handleDragEnd = e => {
+  const commitUpdate = e => {
     let clone = {...props.state}
     clone.x = e.target.attrs['x']
     clone.y = e.target.attrs['y']
-    props.onDragEnd(clone)
+    props.commitUpdate(clone)
   }
 
   return (
@@ -21,7 +21,7 @@ const Entity = props => {
       x={props.state.x}
       y={props.state.y}
       onDblclick={handleDoubleClick}
-      onDragEnd={handleDragEnd}
+      onDragEnd={commitUpdate}
       draggable>
       <Rect
         x={0}

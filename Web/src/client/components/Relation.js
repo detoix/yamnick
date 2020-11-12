@@ -3,8 +3,8 @@ import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
 import { snapPointRadius } from '../utils/Consts'
 
 const Relation = props => {
-  const [start, setStart] = useState(props.start)
-  const [end, setEnd] = useState(props.end)
+  const [start, setStart] = useState({...props.start})
+  const [end, setEnd] = useState({...props.end})
 
   useEffect(() => {
     trySnapById(setStart, props.start)
@@ -50,7 +50,9 @@ const Relation = props => {
     }   
   }
 
-  const trySnapByPosition = (setPoint, x, y) => {
+  const trySnapByPosition = (setPoint, e) => {
+    let x = e.target.attrs['x']
+    let y = e.target.attrs['y']
     let newSnapPoint = {
       x: x,
       y: y,
@@ -78,7 +80,7 @@ const Relation = props => {
   }
 
   const commitUpdate = e => {
-    props.onDragEnd({
+    props.commitUpdate({
       start: start,
       end: end
     })
@@ -96,8 +98,7 @@ const Relation = props => {
         draggable
         x={start.point.x}
         y={start.point.y}
-        onDragMove={e => trySnapByPosition(
-          setStart, e.target.attrs['x'], e.target.attrs['y'])}
+        onDragMove={e => trySnapByPosition(setStart, e)}
         onDragEnd={commitUpdate}
         opacity={0}
         radius={snapPointRadius}
@@ -106,8 +107,7 @@ const Relation = props => {
         draggable
         x={end.point.x}
         y={end.point.y}
-        onDragMove={e => trySnapByPosition(
-          setEnd, e.target.attrs['x'], e.target.attrs['y'])}
+        onDragMove={e => trySnapByPosition(setEnd, e)}
         onDragEnd={commitUpdate}
         opacity={0}
         radius={snapPointRadius}
