@@ -1,3 +1,12 @@
-const snapPointRadius = 15
+import lion from '../../../public/lion.png'
+import dog from '../../../public/dog.png'
 
-export { snapPointRadius }
+const snapPointRadius = 15
+const images = [
+  lion,
+  dog
+]
+
+export { 
+  snapPointRadius, 
+  images }

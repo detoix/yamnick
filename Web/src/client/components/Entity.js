@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Image, Line } from 'react-konva';
+import { images } from '../utils/Consts'
 import useImage from 'use-image'
-import lion from '../../../public/lion.png'
 
 const Entity = props => {
-  const [image] = useImage(lion);
+  const [image] = useImage(images[props.state.imageId]);
 
   const handleDoubleClick = e => props.openModal()
 

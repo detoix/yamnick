@@ -52,6 +52,7 @@ namespace Contracts
     public class ClassDefinition : Message
     {
         public string Name { get; set; }
+        public int ImageId { get; set; }
         public Member[] Members { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
