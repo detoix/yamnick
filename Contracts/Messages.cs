@@ -52,8 +52,15 @@ namespace Contracts
     public class ClassDefinition : Message
     {
         public string Name { get; set; }
+        public Member[] Members { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
+    }
+
+    [Serializable]
+    public class Member : Message
+    {
+        public string Name { get; set; }
     }
 
     [Serializable]

@@ -5,7 +5,6 @@ import lion from '../../../public/lion.png'
 
 const Entity = props => {
   const [image] = useImage(lion);
-  const [fields, setFields] = useState(['dupa1', 'dupa1'])
 
   const handleDoubleClick = e => props.openModal()
 
@@ -27,15 +26,15 @@ const Entity = props => {
         x={0}
         y={0}
         width={props.state.width}
-        height={props.state.height / 2}
+        height={50}
         stroke='black'
         strokeWidth={1}
       />
       <Rect
         x={0}
-        y={props.state.height / 2}
+        y={50}
         width={props.state.width}
-        height={props.state.height / 2}
+        height={props.state.height - 50}
         stroke='black'
         strokeWidth={1}
       />
@@ -43,16 +42,19 @@ const Entity = props => {
         x={0}
         y={0} 
         width={props.state.width}
+        height={50}
         text={props.state.name} 
         fontSize={15}
         align='center'
+        verticalAlign='middle'
       />
-      {fields.map((field, index) => 
+      {props.state.members && props.state.members.filter(member => member).map((member, index) => 
         <Text 
           x={0}
-          y={props.state.height / 2 + index * 15} 
+          y={50 + index * 15} 
+          padding={5}
           key={index} 
-          text={'+ field: ' + field} 
+          text={member.name} 
         />)}
       <Image 
         image={image}

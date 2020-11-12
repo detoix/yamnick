@@ -3,9 +3,10 @@ import { snapPointRadius } from './Consts'
 function ExtendedEntity(wrappee) {
   this.id = wrappee.id
   this.name = wrappee.name
+  this.members = wrappee.members
   this.x = wrappee.x
   this.y = wrappee.y
-  this.height = 100
+  this.height = 50 + (wrappee.members ? wrappee.members.length * 15 + 5 : 50)
   this.width = 150
   this.edgePoints = [
     {x: this.x, y: this.y},

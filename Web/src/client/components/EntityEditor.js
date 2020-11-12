@@ -12,6 +12,17 @@ const EntityEditor = props => {
     setState(newState)
   }
 
+  const handleMembersChange = e => {
+    let newState = state
+    newState.members = e.target.value.split(/\n/)
+      .map(memberName => {
+        return {
+          name: memberName
+        }
+      })
+    setState(newState)
+  }
+
   const getModalStyle = () => {
     const top = 50;
     const left = 50;
@@ -20,7 +31,8 @@ const EntityEditor = props => {
       top: `${top}%`,
       left: `${left}%`,
       transform: `translate(-${top}%, -${left}%)`,
-      position: 'absolute'
+      position: 'absolute',
+      padding: '10px'
     };
   }
 
@@ -28,17 +40,17 @@ const EntityEditor = props => {
     <Modal open={true} onClose={handleClose}>
       <Paper style={getModalStyle()}>
         <TextField 
-          label="Entity name" 
+          label="Name" 
           fullWidth
           defaultValue={props.editable.name} 
           onChange={handleNameChange} />
         <TextField
-          label="Multiline"
+          label="Members"
           fullWidth
           multiline
           rows={4}
-          defaultValue="Default Value"
-        />
+          defaultValue={(props.editable.members ?? [{name: ''}]).map(e => e.name).reduce((prev, curr) => prev + ("\n") + curr)}
+          onChange={handleMembersChange} />
       </Paper>
     </Modal>
   )
