@@ -86,8 +86,15 @@ const Relation = props => {
     })
   }
 
+  const commitRemove = e => {
+    if (e.evt.shiftKey) { 
+      props.commitRemove() 
+    }
+  }
+
   return (
-    <Group>
+    <Group
+      onClick={commitRemove}>
       <Arrow
         points={[start.point.x, start.point.y, end.point.x, end.point.y]}
         fill='white'

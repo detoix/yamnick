@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Group, Rect, Text, Image, Line } from 'react-konva';
+import { Group, Rect, Text, Image, Circle } from 'react-konva';
 import { images } from '../utils/Consts'
 import useImage from 'use-image'
 
 const Entity = props => {
   const [image] = useImage(images[props.state.imageId]);
 
-  const handleDoubleClick = e => props.openModal()
+  const openModal = e => props.openModal()
 
   const commitUpdate = e => {
     let clone = {...props.state}
@@ -15,19 +15,36 @@ const Entity = props => {
     props.commitUpdate(clone)
   }
 
+  const commitRemove = e => {
+    if (e.evt.shiftKey) { 
+      props.commitRemove() 
+    }
+  }
+
   return (
     <Group
       x={props.state.x}
       y={props.state.y}
-      onDblclick={handleDoubleClick}
+      onDblclick={openModal}
       onDragEnd={commitUpdate}
+      onClick={commitRemove}
       draggable>
+
+      {props.state.edgePoints.map((snapPoint, index) => 
+        <Circle 
+          key={index} 
+          x={snapPoint.x - props.state.x} 
+          y={snapPoint.y - props.state.y} 
+          fill='gray' 
+          radius={3} />)}
+
       <Rect
         x={0}
         y={0}
         width={props.state.width}
         height={50}
         stroke='black'
+        fill='white'
         strokeWidth={1}
       />
       <Rect
@@ -36,6 +53,7 @@ const Entity = props => {
         width={props.state.width}
         height={props.state.height - 50}
         stroke='black'
+        fill='white'
         strokeWidth={1}
       />
       <Text

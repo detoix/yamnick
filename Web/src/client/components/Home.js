@@ -37,6 +37,19 @@ const Home = ({socket}) => {
 
   const idInt = () => Number(id)
 
+  const pushDiagramWith = (upToDateEntities, upToDateRelations) => {
+    let request = {
+      diagram: 
+      {
+        id: idInt(),
+        classDefinitions: upToDateEntities,
+        relations: upToDateRelations
+      }
+    }
+
+    socket.emit("request_issued", JSON.stringify(request))
+  }
+
   const handleDrop = e => {
     
     // register event position
@@ -62,17 +75,8 @@ const Home = ({socket}) => {
         }
       }
     ])
-    
-    let request = {
-      diagram: 
-      {
-        id: idInt(),
-        classDefinitions: upToDateEntities,
-        relations: upToDateRelations
-      }
-    }
 
-    socket.emit("request_issued", JSON.stringify(request))
+    pushDiagramWith(upToDateEntities, upToDateRelations)
   }
 
   const openRenderEntityEditor = index => e => {
@@ -94,35 +98,31 @@ const Home = ({socket}) => {
   };
 
   const handleEntityDragEnd = index => e => {
-    let newState = [...entities]; // copying the old datas array
-    newState[index] = e
+    let upToDateEntities = [...entities]; // copying the old datas array
+    upToDateEntities[index] = e
 
-    let request = {
-      diagram: 
-      {
-        id: idInt(),
-        classDefinitions: newState,
-        relations: relations
-      }
-    }
+    pushDiagramWith(upToDateEntities, relations)
+  }
 
-    socket.emit("request_issued", JSON.stringify(request))
+  const removeEntity = index => e => {
+    let upToDateEntities = [...entities]; // copying the old datas array
+    upToDateEntities.splice(index, 1)
+
+    pushDiagramWith(upToDateEntities, relations)
   }
 
   const handleRelationDragEnd = index => e => {
-    let newState = [...relations]; // copying the old datas array
-    newState[index] = e
+    let upToDateRelations = [...relations]; // copying the old datas array
+    upToDateRelations[index] = e
 
-    let request = {
-      diagram: 
-      {
-        id: idInt(),
-        classDefinitions: entities,
-        relations: newState
-      }
-    }
+    pushDiagramWith(entities, upToDateRelations)
+  }
 
-    socket.emit("request_issued", JSON.stringify(request))
+  const removeRelation = index => e => {
+    let upToDateRelations = [...relations]; // copying the old datas array
+    upToDateRelations.splice(index, 1)
+
+    pushDiagramWith(entities, upToDateRelations)
   }
 
   return (
@@ -156,7 +156,7 @@ const Home = ({socket}) => {
       >
         <Stage
           container='container'
-          width={3000}
+          width={2000}
           height={1000}
           ref={stageRef}
         >
@@ -166,7 +166,8 @@ const Home = ({socket}) => {
                 key={index} 
                 state={entity}
                 openModal={openRenderEntityEditor(index)}
-                commitUpdate={handleEntityDragEnd(index)} />)}
+                commitUpdate={handleEntityDragEnd(index)}
+                commitRemove={removeEntity(index)} />)}
 
             {relations && relations.map((relation, index) => 
               <Relation 
@@ -175,7 +176,8 @@ const Home = ({socket}) => {
                 start={relation.start}
                 end={relation.end}
                 entities={entities}
-                commitUpdate={handleRelationDragEnd(index)} />)}
+                commitUpdate={handleRelationDragEnd(index)}
+                commitRemove={removeRelation(index)} />)}
 
           </Layer>
         </Stage>
