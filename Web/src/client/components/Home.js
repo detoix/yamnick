@@ -149,13 +149,15 @@ const Home = ({socket}) => {
       </Toolbar>
       <MaybeEntityEditor />
       <div
+        id="container"
+        style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
         onDrop={e => handleDrop(e)}
         onDragOver={e => e.preventDefault()}
       >
         <Stage
-          width={window.innerWidth}
-          height={window.innerHeight}
-          style={{ border: '1px solid grey' }}
+          container='container'
+          width={3000}
+          height={1000}
           ref={stageRef}
         >
           <Layer>

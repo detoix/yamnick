@@ -41,7 +41,7 @@ const App = () => {
   return (
     <Router history={history}>
       <NavBar />
-      {socket && <Container style={{ padding: 20 }}>
+      {socket && <Container>
         <Switch>
           <Route exact path='/' render={(props) => <Home {...props} socket={socket} />} />
           <Route path='/diagram/:id' render={(props) => <Home {...props} socket={socket} />} />
