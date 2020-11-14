@@ -13,7 +13,9 @@ const App = () => {
 
   useEffect(() => {
     const authorize = async () => {
-      const socket = socketIOClient(window.location.origin)
+      const socket = socketIOClient("http://localhost:8090", {
+        transports: ['websocket'],
+      })
       socket.once('server_ready', () => {
         setSocket(socket)
       })

@@ -2,28 +2,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build-crawlers-manager",
+            "label": "build-application",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/CrawlersManager/CrawlersManager.csproj",
+                "${workspaceFolder}/Application/Application.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build-body",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Body/Body.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
+        }
     ]
 }

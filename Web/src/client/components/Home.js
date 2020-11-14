@@ -17,8 +17,7 @@ const Home = ({socket}) => {
   const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
 
   useEffect(() => {
-    socket.on("diagram_persisted", data => {
-      let content = JSON.parse(data)
+    socket.on("diagram_persisted", content => {
       if (content.id === idInt()) {
         setEntities(content.classDefinitions
           .map(e => new ExtendedEntity(e)))
