@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build-application",
             "program": "${workspaceFolder}/Application/bin/Debug/netcoreapp3.1/Application.dll",
-            "args": [ "Server=localhost;Port=5432;Database=local;User Id=postgres;Password=postgres;", "amqps://wenivnjk:qfIQwrfK2nA8oe9pe_i2F_KsVhZwnXWd@bear.rmq.cloudamqp.com/wenivnjk"],
+            "args": [ "Server=localhost;Port=5432;Database=local;User Id=postgres;Password=postgres;"],
             "cwd": "${workspaceFolder}/Application",
             "console": "internalConsole",
             "stopAtEntry": false
