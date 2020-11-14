@@ -1,11 +1,10 @@
 using Akka.Actor;
 using Contracts;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace Application.Actors
 {
-    delegate void Send(string channel, string message, string replyTo);
+    delegate void Send(string channel, TypedMessage message, string replyTo);
 
     class GatewayActor : ReceiveActor
     {
@@ -80,10 +79,10 @@ namespace Application.Actors
             {
                 System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.Content.ReplyTo}");
 
-                var message = JsonSerializer.Serialize(args.Content, new JsonSerializerOptions()
+                var message = new TypedMessage()
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                    Diagram = args.Content
+                };
 
                 this.Send("web_mailbox", message, string.Empty);
             });

@@ -6,12 +6,7 @@ using Akka.Actor;
 using Contracts;
 using Application.Actors;
 using Marten;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using BeetleX.FastHttpApi;
-using BeetleX.EventArgs;
-using System.Threading;
-using System.Threading.Tasks;
 using BeetleX.FastHttpApi.WebSockets;
 using System.Text.RegularExpressions;
 
@@ -25,8 +20,6 @@ namespace Application
                 $"Starting up with args of: {string.Join(" ", args)}");
 
             using (var store = DocumentStore.For(ValidConnectionStringFrom(args[0])))
-            using (var connection = new RabbitMQ.Client.ConnectionFactory() { Uri = new Uri(args[1]) }.CreateConnection())
-            using (var channel = connection.CreateModel())
             using (var system = ActorSystem.Create("System"))
             using (var webSocketServer = new SocketIOServer())
             {
@@ -34,46 +27,32 @@ namespace Application
 
                 Console.Write(webSocketServer.BaseServer);
 
-                webSocketServer.WebSocketConnect += (a, b) =>
-                {   
-                    webSocketServer.Log(LogType.Info, b.Request.Session, b.Request.Session.Tag, "Client connected");
-
-                    Task.Run(() =>
+                webSocketServer.HttpResponsed += (_, eventArgs) =>
+                {
+                    if (eventArgs.Status == 101)
                     {
-                        Thread.Sleep(2000);
-                        System.Console.WriteLine("SENDING THIS MESSAGE");
-                        webSocketServer.SendToWebSocket(
-                            webSocketServer.CreateDataFrame("0{\"sid\":\"JSvFLXDjskv3zmKFAAAB\",\"upgrades\":[],\"pingInterval\":25000,\"pingTimeout\":5000}"));
-                        webSocketServer.SendToWebSocket(
-                            webSocketServer.CreateDataFrame("40"));
-                        webSocketServer.SendToWebSocket(
-                            webSocketServer.CreateDataFrame("42[\"server_ready\"]"));
-                    });
+                        eventArgs.Request.Session.Send(
+                            webSocketServer.CreateDataFrame(SocketIOMessage.AcknowledgeMessage1));
+                        eventArgs.Request.Session.Send(
+                            webSocketServer.CreateDataFrame(SocketIOMessage.AcknowledgeMessage2));
+                        eventArgs.Request.Session.Send(
+                            webSocketServer.CreateDataFrame(SocketIOMessage.AcknowledgeMessage3));
+                    }
                 };
 
                 Send send = (channelName, message, replyTo) =>
                 {
-                    var props = channel.CreateBasicProperties();
-                    if (!string.IsNullOrEmpty(replyTo))
-                        props.ReplyTo = replyTo;
-                    channel.BasicPublish(
-                        exchange: string.Empty,
-                        routingKey: channelName,
-                        basicProperties: props,
-                        body: Encoding.UTF8.GetBytes(message));
-                };
+                    var socketIOMessage = new SocketIOMessage("diagram_persisted", message);
+                    var serializedMessage = socketIOMessage.Serialize();
 
-                send = (channelName, message, replyTo) =>
-                {
                     webSocketServer.SendToWebSocket(
-                            webSocketServer.CreateDataFrame("42[\"diagram_persisted\"," + message + "]"));
+                            webSocketServer.CreateDataFrame(serializedMessage));
                 };
 
                 var persistenceManager = system.ActorOf(
                     Props.Create<PersistenceActor>(store));
                 var coordinator = system.ActorOf(
                     Props.Create<GatewayActor>(persistenceManager, send));
-                var router = new EventingBasicConsumer(channel);
                 webSocketServer.WebSocketReceive += (_, eventArgs) =>
                 {
                     if (eventArgs.Frame.Type == BeetleX.FastHttpApi.WebSockets.DataPacketType.text)
@@ -82,24 +61,7 @@ namespace Application
                         coordinator.Tell(message.Content);
                     }
                 };
-                router.Received += (model, ea) => 
-                {
-                    var serialized = Encoding.UTF8.GetString(ea.Body);
-                    System.Console.WriteLine($"System received message of {serialized}");
-                    var message = JsonSerializer.Deserialize<TypedMessage>(serialized, new  JsonSerializerOptions()
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                    });
-                    message.ReplyTo = ea.BasicProperties.ReplyTo;
-                    coordinator.Tell(message);
-                };
-                var taskQueueName = "app_mailbox";
-                channel.QueueDeclare(taskQueueName, durable: true);
-                channel.BasicConsume(
-                    queue: taskQueueName, 
-                    autoAck: true,
-                    consumer: router);
-
+                
                 do
                 {
                     
@@ -141,8 +103,7 @@ namespace Application
         }
     }
 
-
-    public class SocketIOMessage
+    class SocketIOMessage
     {
         private static SocketIOMessage InvalidMessage { get; } = new SocketIOMessage(string.Empty, new TypedMessage());
         private static JsonSerializerOptions SerializerOptions { get; } = new  JsonSerializerOptions()
@@ -150,6 +111,9 @@ namespace Application
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
         private const string MessagePattern = @"\[.*\]";
+        public const string AcknowledgeMessage1 = "0{\"sid\":\"0\",\"upgrades\":[],\"pingInterval\":25000,\"pingTimeout\":5000}";
+        public const string AcknowledgeMessage2 = "40";
+        public const string AcknowledgeMessage3 = "42[\"server_ready\"]";
 
         public static SocketIOMessage From(DataFrame frame)
         {
@@ -193,7 +157,7 @@ namespace Application
         public string Type { get; }
         public TypedMessage Content { get; }
 
-        private SocketIOMessage(string type, TypedMessage content)
+        public SocketIOMessage(string type, TypedMessage content)
         {
             this.Type = type;
             this.Content = content;
@@ -201,7 +165,8 @@ namespace Application
 
         public string Serialize(int prefix = 42)
         {
-            return string.Empty;
+            var message = JsonSerializer.Serialize(this.Content, SerializerOptions);
+            return $"{prefix}[\"{this.Type}\",{message}]";
         }
     }
 }

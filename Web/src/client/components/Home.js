@@ -18,10 +18,11 @@ const Home = ({socket}) => {
 
   useEffect(() => {
     socket.on("diagram_persisted", content => {
-      if (content.id === idInt()) {
-        setEntities(content.classDefinitions
+      let diagram = content.diagram
+      if (diagram.id === idInt()) {
+        setEntities(diagram.classDefinitions
           .map(e => new ExtendedEntity(e)))
-        setRelations(content.relations)
+        setRelations(diagram.relations)
       }
     })   
 
