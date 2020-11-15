@@ -28,31 +28,6 @@ namespace Application
 
                 Console.Write(webSocketServer.BaseServer);
 
-                webSocketServer.HttpConnecting += (_, eventArgs) =>
-                {
-                    System.Console.WriteLine(1);
-                    // webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Socket., "1");
-                };
-
-                webSocketServer.Started += (_, eventArgs) =>
-                {
-                };
-
-                webSocketServer.HttpRequesting += (_, eventArgs) =>
-                {
-                    System.Console.WriteLine(2);
-                    webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "2");
-                };
-
-                webSocketServer.WebSocketConnect += (_, eventArgs) =>
-                {
-                    System.Console.WriteLine(3);
-                    webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "3");
-                };
-
-                
-                System.Console.WriteLine(0);
-
                 webSocketServer.HttpResponsed += (_, eventArgs) =>
                 {
                     webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "5");
@@ -122,8 +97,8 @@ namespace Application
         public SocketIOServer(string port) : base(new HttpOptions()
         {
             LogToConsole = true,
-            Port = 8090,
-            LogLevel = BeetleX.EventArgs.LogType.All,
+            Port = 8080,
+            LogLevel = BeetleX.EventArgs.LogType.Info,
             CrossDomain = new OptionsAttribute()
             {
                 AllowHeaders = "*",
@@ -131,26 +106,13 @@ namespace Application
                 AllowOrigin = "*"
             },
             SSL = true,
-            SSLPort = int.Parse(port),
+            SSLPort = 3000,
             CertificateFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keyBag.pfx"),
-            CertificatePassword = "1234"
+            CertificatePassword = "1234",
+            StaticResourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dist")
         })
         {
-            if (File.Exists("keyBag.pfx"))
-            {
-                System.Console.WriteLine("jest");
-            }
-            else
-            {
-                System.Console.WriteLine("nie ma");
-            }
 
-            foreach (var f in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory))
-            {
-                System.Console.WriteLine(f);
-            }
-
-            System.Console.WriteLine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keyBag.pfx"));
         }
     }
 
