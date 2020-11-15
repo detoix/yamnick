@@ -9,6 +9,7 @@ using Marten;
 using BeetleX.FastHttpApi;
 using BeetleX.FastHttpApi.WebSockets;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Application
 {
@@ -21,14 +22,40 @@ namespace Application
 
             using (var store = DocumentStore.For(ValidConnectionStringFrom(args[0])))
             using (var system = ActorSystem.Create("System"))
-            using (var webSocketServer = new SocketIOServer())
+            using (var webSocketServer = new SocketIOServer(args[1]))
             {
                 webSocketServer.Open();
 
                 Console.Write(webSocketServer.BaseServer);
 
+                webSocketServer.HttpConnecting += (_, eventArgs) =>
+                {
+                    System.Console.WriteLine(1);
+                    // webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Socket., "1");
+                };
+
+                webSocketServer.Started += (_, eventArgs) =>
+                {
+                };
+
+                webSocketServer.HttpRequesting += (_, eventArgs) =>
+                {
+                    System.Console.WriteLine(2);
+                    webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "2");
+                };
+
+                webSocketServer.WebSocketConnect += (_, eventArgs) =>
+                {
+                    System.Console.WriteLine(3);
+                    webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "3");
+                };
+
+                
+                System.Console.WriteLine(0);
+
                 webSocketServer.HttpResponsed += (_, eventArgs) =>
                 {
+                    webSocketServer.Log(BeetleX.EventArgs.LogType.Info, eventArgs.Request.Session, "5");
                     if (eventArgs.Status == 101)
                     {
                         eventArgs.Request.Session.Send(
@@ -92,14 +119,38 @@ namespace Application
 
     class SocketIOServer : BeetleX.FastHttpApi.HttpApiServer
     {
-        public SocketIOServer() : base(new HttpOptions()
+        public SocketIOServer(string port) : base(new HttpOptions()
         {
             LogToConsole = true,
             Port = 8090,
-            LogLevel = BeetleX.EventArgs.LogType.Info,
+            LogLevel = BeetleX.EventArgs.LogType.All,
+            CrossDomain = new OptionsAttribute()
+            {
+                AllowHeaders = "*",
+                AllowMethods = "*",
+                AllowOrigin = "*"
+            },
+            SSL = true,
+            SSLPort = int.Parse(port),
+            CertificateFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keyBag.pfx"),
+            CertificatePassword = "1234"
         })
         {
-            
+            if (File.Exists("keyBag.pfx"))
+            {
+                System.Console.WriteLine("jest");
+            }
+            else
+            {
+                System.Console.WriteLine("nie ma");
+            }
+
+            foreach (var f in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory))
+            {
+                System.Console.WriteLine(f);
+            }
+
+            System.Console.WriteLine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keyBag.pfx"));
         }
     }
 

@@ -13,7 +13,7 @@ const App = () => {
 
   useEffect(() => {
     const authorize = async () => {
-      const socket = socketIOClient("http://localhost:8090", {
+      const socket = socketIOClient("https://fathomless-badlands-54841.herokuapp.com", {
         transports: ['websocket'],
       })
       socket.once('server_ready', () => {
