@@ -17,7 +17,6 @@
     "@material-ui/core": "^4.9.9",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.55",
-    "amqplib": "^0.5.5",
     "babel-polyfill": "^6.26.0",
     "express": "^4.16.3",
     "konva": "^7.1.0",

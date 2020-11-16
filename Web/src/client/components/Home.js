@@ -18,11 +18,10 @@ const Home = ({socket}) => {
 
   useEffect(() => {
     socket.on("diagram_persisted", data => {
-      let content = JSON.parse(data)
-      if (content.id === idInt()) {
-        setEntities(content.classDefinitions
+      if (data.id === idInt()) {
+        setEntities(data.classDefinitions
           .map(e => new ExtendedEntity(e)))
-        setRelations(content.relations)
+        setRelations(data.relations)
       }
     })   
 
