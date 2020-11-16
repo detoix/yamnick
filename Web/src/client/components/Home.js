@@ -29,7 +29,7 @@ const Home = ({socket}) => {
   });
 
   useEffect(() => {
-    socket.emit("request_issued", JSON.stringify({ queryForDiagram: { id: idInt() } }))
+    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: idInt() } }))
   }, [id]);
 
   const idInt = () => Number(id)
@@ -44,7 +44,7 @@ const Home = ({socket}) => {
       }
     }
 
-    socket.emit("request_issued", JSON.stringify(request))
+    socket.emit("REQUEST_ISSUED", JSON.stringify(request))
   }
 
   const handleDrop = e => {

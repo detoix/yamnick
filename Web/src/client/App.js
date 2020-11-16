@@ -15,7 +15,7 @@ const App = () => {
     const authorize = async () => {
       // const socket = socketIOClient("https://secure-brushlands-76941.herokuapp.com")
       const socket = socketIOClient(window.location.origin)
-      socket.once('server_ready', () => {
+      socket.once('SERVER_READY', () => {
         setSocket(socket)
       })
 
