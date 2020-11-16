@@ -15,96 +15,96 @@ namespace Application.Actors
         {
             this.Store = store;
 
-            this.Receive<QueryFor<Diagram>>(args =>
-            {
-                System.Console.WriteLine($"{nameof(PersistenceActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+            // this.Receive<QueryFor<Diagram>>(args =>
+            // {
+            //     System.Console.WriteLine($"{nameof(PersistenceActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                using (var session = store.OpenSession())
-                {
-                    var existingDiagram = session
-                        .Query<Diagram>()
-                        .Where(x => x.Id == args.Id)
-                        .SingleOrDefault();
+            //     using (var session = store.OpenSession())
+            //     {
+            //         var existingDiagram = session
+            //             .Query<Diagram>()
+            //             .Where(x => x.Id == args.Id)
+            //             .SingleOrDefault();
 
-                    if (existingDiagram is null)
-                    {
-                        System.Console.WriteLine($"Diagram of Id {args.Id} not found");
+            //         if (existingDiagram is null)
+            //         {
+            //             System.Console.WriteLine($"Diagram of Id {args.Id} not found");
 
-                        this.Sender.Tell(new NotFound<Diagram>());
-                    }
-                    else
-                    {
-                        System.Console.WriteLine($"Diagram of Id {args.Id} found, forwarding...");
+            //             this.Sender.Tell(new NotFound<Diagram>());
+            //         }
+            //         else
+            //         {
+            //             System.Console.WriteLine($"Diagram of Id {args.Id} found, forwarding...");
 
-                        this.Sender.Tell(new Persisted<Diagram>()
-                        {
-                            Content = existingDiagram
-                        });
-                    }
-                }
-            });
+            //             this.Sender.Tell(new Persisted<Diagram>()
+            //             {
+            //                 Content = existingDiagram
+            //             });
+            //         }
+            //     }
+            // });
 
-            this.Receive<Diagram>(args =>
-            {
-                System.Console.WriteLine($"{nameof(PersistenceActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+            // this.Receive<Diagram>(args =>
+            // {
+            //     System.Console.WriteLine($"{nameof(PersistenceActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                using (var session = store.OpenSession())
-                {
-                    var existingDiagram = session
-                        .Query<Diagram>()
-                        .Where(x => x.Id == args.Id)
-                        .SingleOrDefault();
+            //     using (var session = store.OpenSession())
+            //     {
+            //         var existingDiagram = session
+            //             .Query<Diagram>()
+            //             .Where(x => x.Id == args.Id)
+            //             .SingleOrDefault();
                     
-                    if (existingDiagram is null)
-                    {
-                        System.Console.WriteLine($"Creating new diagram of {args.ReplyTo}");
+            //         if (existingDiagram is null)
+            //         {
+            //             System.Console.WriteLine($"Creating new diagram of {args.ReplyTo}");
 
-                        var availableId = 1;
-                        foreach (var entity in args.ClassDefinitions)
-                        {
-                            entity.Id = availableId;
-                            availableId++;
-                        }
+            //             var availableId = 1;
+            //             foreach (var entity in args.ClassDefinitions)
+            //             {
+            //                 entity.Id = availableId;
+            //                 availableId++;
+            //             }
 
-                        session.Store(args);
-                        session.SaveChanges();
+            //             session.Store(args);
+            //             session.SaveChanges();
 
-                        this.Sender.Tell(new Persisted<Diagram>()
-                        {
-                            Content = args
-                        });
-                    }
-                    else
-                    {
-                        System.Console.WriteLine($"Found existing diagram of {args.ReplyTo}");
+            //             this.Sender.Tell(new Persisted<Diagram>()
+            //             {
+            //                 Content = args
+            //             });
+            //         }
+            //         else
+            //         {
+            //             System.Console.WriteLine($"Found existing diagram of {args.ReplyTo}");
 
-                        var availableId = args.ClassDefinitions
-                            .Select(e => e.Id)
-                            .DefaultIfEmpty(0)
-                            .Max() + 1;
+            //             var availableId = args.ClassDefinitions
+            //                 .Select(e => e.Id)
+            //                 .DefaultIfEmpty(0)
+            //                 .Max() + 1;
 
-                        foreach (var entity in args.ClassDefinitions)
-                        {
-                            if (entity.Id == 0)
-                            {
-                                entity.Id = availableId;
-                                availableId++;
-                            }
-                        }
+            //             foreach (var entity in args.ClassDefinitions)
+            //             {
+            //                 if (entity.Id == 0)
+            //                 {
+            //                     entity.Id = availableId;
+            //                     availableId++;
+            //                 }
+            //             }
 
-                        existingDiagram.ClassDefinitions = args.ClassDefinitions;
-                        existingDiagram.Relations = args.Relations;
+            //             existingDiagram.ClassDefinitions = args.ClassDefinitions;
+            //             existingDiagram.Relations = args.Relations;
 
-                        session.Store(existingDiagram);
-                        session.SaveChanges();
+            //             session.Store(existingDiagram);
+            //             session.SaveChanges();
 
-                        this.Sender.Tell(new Persisted<Diagram>()
-                        {
-                            Content = existingDiagram
-                        });
-                    }
-                }
-            });
+            //             this.Sender.Tell(new Persisted<Diagram>()
+            //             {
+            //                 Content = existingDiagram
+            //             });
+            //         }
+            //     }
+            // });
         }
 
         protected override void PreStart()

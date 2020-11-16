@@ -54,22 +54,22 @@ namespace Application.Actors
                 Context.System.EventStream.Publish(args);
             });
 
-            this.Receive<QueryFor<Diagram>>(args =>
-            {
-                System.Console.WriteLine($"Initialized {nameof(DiagramActor)} of id {this.PersistenceId} received {nameof(QueryFor<Diagram>)}");
+            // this.Receive<QueryFor<Diagram>>(args =>
+            // {
+            //     System.Console.WriteLine($"Initialized {nameof(DiagramActor)} of id {this.PersistenceId} received {nameof(QueryFor<Diagram>)}");
 
-                this.Sender.Tell(new Persisted<Diagram>()
-                {
-                    Content = this.State
-                });
-            });
+            //     this.Sender.Tell(new Persisted<Diagram>()
+            //     {
+            //         Content = this.State
+            //     });
+            // });
 
-            this.Receive<Diagram>(args =>
-            {
-                System.Console.WriteLine($"Updating persistence state of {nameof(DiagramActor)} of id {this.PersistenceId}");
+            // this.Receive<Diagram>(args =>
+            // {
+            //     System.Console.WriteLine($"Updating persistence state of {nameof(DiagramActor)} of id {this.PersistenceId}");
 
-                this.PersistenceManager.Tell(args);
-            });
+            //     this.PersistenceManager.Tell(args);
+            // });
         }
 
         protected override void PreStart()

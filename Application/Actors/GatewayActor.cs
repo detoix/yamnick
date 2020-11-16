@@ -21,72 +21,72 @@ namespace Application.Actors
             this.PersistenceManager = persistenceManager;
             this.Send = send;
 
-            this.Receive<TypedMessage>(args =>
-            {
-                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+            // this.Receive<TypedMessage>(args =>
+            // {
+            //     System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
                 
-                if (args.QueryForDiagram != null)
-                {
-                    args.QueryForDiagram.ReplyTo = args.ReplyTo;
-                    this.Self.Forward(args.QueryForDiagram);
-                }
-                else if (args.Diagram != null)
-                {
-                    args.Diagram.ReplyTo = args.ReplyTo;
-                    this.Self.Forward(args.Diagram);
-                }
-                else
-                {
-                    System.Console.WriteLine("Unknown message received");
-                }
-            });
+            //     if (args.QueryForDiagram != null)
+            //     {
+            //         args.QueryForDiagram.ReplyTo = args.ReplyTo;
+            //         this.Self.Forward(args.QueryForDiagram);
+            //     }
+            //     else if (args.Diagram != null)
+            //     {
+            //         args.Diagram.ReplyTo = args.ReplyTo;
+            //         this.Self.Forward(args.Diagram);
+            //     }
+            //     else
+            //     {
+            //         System.Console.WriteLine("Unknown message received");
+            //     }
+            // });
 
-            this.Receive<QueryFor<Diagram>>(args =>
-            {
-                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+            // this.Receive<QueryFor<Diagram>>(args =>
+            // {
+            //     System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                if (this.Diagrams.TryGetValue(args.Id, out var diagram))
-                {
-                    diagram.Tell(args);
-                }
-                else
-                {
-                    var newDiagram = Context.ActorOf(
-                        Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
-                    this.Diagrams.Add(args.Id, newDiagram);
-                    newDiagram.Tell(args);
-                }
-            });
+            //     if (this.Diagrams.TryGetValue(args.Id, out var diagram))
+            //     {
+            //         diagram.Tell(args);
+            //     }
+            //     else
+            //     {
+            //         var newDiagram = Context.ActorOf(
+            //             Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
+            //         this.Diagrams.Add(args.Id, newDiagram);
+            //         newDiagram.Tell(args);
+            //     }
+            // });
 
-            this.Receive<Diagram>(args => 
-            {
-                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
+            // this.Receive<Diagram>(args => 
+            // {
+            //     System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.ReplyTo}");
 
-                if (this.Diagrams.TryGetValue(args.Id, out var diagram))
-                {
-                    diagram.Tell(args);
-                }
-                else
-                {
-                    var newDiagram = Context.ActorOf(
-                        Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
-                    this.Diagrams.Add(args.Id, newDiagram);
-                    newDiagram.Tell(args);
-                }
-            });
+            //     if (this.Diagrams.TryGetValue(args.Id, out var diagram))
+            //     {
+            //         diagram.Tell(args);
+            //     }
+            //     else
+            //     {
+            //         var newDiagram = Context.ActorOf(
+            //             Props.Create<DiagramActor>(args.Id, this.PersistenceManager));
+            //         this.Diagrams.Add(args.Id, newDiagram);
+            //         newDiagram.Tell(args);
+            //     }
+            // });
 
-            Context.Dispatcher.EventStream.Subscribe(this.Self, typeof(Persisted<Diagram>));
-            this.Receive<Persisted<Diagram>>(args =>
-            {
-                System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.Content.ReplyTo}");
+            // Context.Dispatcher.EventStream.Subscribe(this.Self, typeof(Persisted<Diagram>));
+            // this.Receive<Persisted<Diagram>>(args =>
+            // {
+            //     System.Console.WriteLine($"{nameof(GatewayActor)} processing {args} of {args.Id} by {args.Content.ReplyTo}");
 
-                var message = JsonSerializer.Serialize(args.Content, new JsonSerializerOptions()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+            //     var message = JsonSerializer.Serialize(args.Content, new JsonSerializerOptions()
+            //     {
+            //         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            //     });
 
-                this.Send("web_mailbox", message, string.Empty);
-            });
+            //     this.Send("web_mailbox", message, string.Empty);
+            // });
         }
     }
 }

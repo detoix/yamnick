@@ -17,7 +17,7 @@ const Home = ({socket}) => {
   const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
 
   useEffect(() => {
-    socket.on("diagram_persisted", data => {
+    socket.on("DIAGRAM_PERSISTED", data => {
       if (data.id === idInt()) {
         setEntities(data.classDefinitions
           .map(e => new ExtendedEntity(e)))
@@ -25,13 +25,11 @@ const Home = ({socket}) => {
       }
     })   
 
-    return () => socket.off('diagram_persisted')
+    return () => socket.off('DIAGRAM_PERSISTED')
   });
 
   useEffect(() => {
-    socket.emit("request_issued", JSON.stringify({
-            queryForDiagram: { id: idInt() }
-          }))
+    socket.emit("request_issued", JSON.stringify({ queryForDiagram: { id: idInt() } }))
   }, [id]);
 
   const idInt = () => Number(id)
