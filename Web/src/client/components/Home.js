@@ -18,7 +18,7 @@ const Home = ({socket}) => {
 
   useEffect(() => {
     socket.on("DIAGRAM_PERSISTED", data => {
-      if (data.id === idInt()) {
+      if (data.id == id) {
         setEntities(data.classDefinitions
           .map(e => new ExtendedEntity(e)))
         setRelations(data.relations)
@@ -38,7 +38,7 @@ const Home = ({socket}) => {
     let request = {
       diagram: 
       {
-        id: idInt(),
+        id: id,
         classDefinitions: upToDateEntities,
         relations: upToDateRelations
       }
@@ -54,7 +54,13 @@ const Home = ({socket}) => {
     
     let dropPosition = stageRef.current.getPointerPosition()
 
-    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [dropPosition])
+    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [
+      {
+        imageId: 0,
+        x: dropPosition.x,
+        y: dropPosition.y
+      }
+    ])
 
     let upToDateRelations = (relations ?? []).concat(draggedItemRef.current != 'relation' ? [] : [
       {
