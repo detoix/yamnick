@@ -3,14 +3,13 @@ const http = require("http")
 const socketIo = require("socket.io")
 const socketioJwt = require('socketio-jwt')
 const { start, configurePersistence, dispatch, spawnStateless, spawnPersistent } = require('nact')
-const { PostgresPersistenceEngine } = require('nact-persistence-postgres')
+const PostgresDocumentDBEngine = require('./persistence')
 
 const app = express()
 const server = http.createServer(app)
 const io = socketIo(server)
 const sockets = new Set()
-const connectionString = "postgres://xd:xd@localhost:5432/tmp?ssl=false"
-const system = start(configurePersistence(new PostgresPersistenceEngine(connectionString)))
+const system = start(configurePersistence(new PostgresDocumentDBEngine(process.env.DATABASE_URL)))
 
 const diagramBehavior = async (state = {}, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
