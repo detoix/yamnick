@@ -4,33 +4,53 @@ import { Modal, Paper, Grid, TextField,
 import { images } from '../utils/Consts'
 
 const EntityEditor = props => {
-  const [state, setState] = useState({...props.editable})
   const [activeImageId, setActiveImageId] = useState(props.editable.imageId) //required to keep select value up-to-date
+  const [behavior, setBehavior] = useState(() => state => state)
 
-  const handleClose = () => props.handleClose(state)
+  const handleClose = () => props.handleClose(behavior)
   
   const handleNameChange = e => {
-    let newState = state
-    newState.name = e.target.value
-    setState(newState)
+    let newValue = e.target.value
+    let newBehavior = state => {
+      let newState = behavior(state)
+      newState.name = newValue
+
+      return newState
+    }
+
+    setBehavior(() => newBehavior)
   }
 
   const handleMembersChange = e => {
-    let newState = state
-    newState.members = e.target.value.split(/\n/)
-      .map(memberName => {
-        return {
-          name: memberName
-        }
-      })
-    setState(newState)
+
+    let newValue = e.target.value.split(/\n/)
+    let newBehavior = state => {
+      let newState = behavior(state)
+      newState.members = newValue
+        .map(memberName => {
+          return {
+            name: memberName
+          }
+        })
+
+      return newState
+    }
+
+    setBehavior(() => newBehavior)
   }
 
   const handleImageChange = e => {
-    let newState = state
-    newState.imageId = e.target.value
-    setState(newState)
-    setActiveImageId(e.target.value)
+    setActiveImageId(e.target.value) //required to keep select value up-to-date
+
+    let newValue = e.target.value
+    let newBehavior = state => {
+      let newState = behavior(state)
+      newState.imageId = newValue
+
+      return newState
+    }
+
+    setBehavior(() => newBehavior)
   }
 
   const getModalStyle = () => {

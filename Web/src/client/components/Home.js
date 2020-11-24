@@ -82,23 +82,20 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, upToDateRelations)
   }
 
-  const openRenderEntityEditor = index => e => {
+  const renderEntityEditor = entity => e => {
     setMaybeEntityEditor(() => props => {
       return <EntityEditor
-        editable={entities[index]}
-        handleClose={onModalClosed}
+        editable={entity}
+        handleClose={behavior => {
+          let indexOfEntity = props.entities.findIndex(e => e.id == entity.id)
+          let entityToUpdate = behavior(props.entities[indexOfEntity])
+
+          handleEntityDragEnd(indexOfEntity)(entityToUpdate)
+          setMaybeEntityEditor(() => props => null)
+        }}
       />
     })
   }
-
-  const closeRenderEntityEditor = () => setMaybeEntityEditor(() => props => null)
-
-  const onModalClosed = (entityToUpdate) => {
-    let indexOfEntity = entities.findIndex(
-      e => e.id == entityToUpdate.id)
-    handleEntityDragEnd(indexOfEntity)(entityToUpdate)
-    closeRenderEntityEditor()
-  };
 
   const handleEntityDragEnd = index => e => {
     let upToDateEntities = [...entities]; // copying the old datas array
@@ -150,7 +147,7 @@ const Home = ({socket}) => {
           Relation
         </Button>
       </Toolbar>
-      <MaybeEntityEditor />
+      <MaybeEntityEditor entities={entities} />
       <div
         id="container"
         style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
@@ -168,7 +165,7 @@ const Home = ({socket}) => {
               <Entity 
                 key={index} 
                 state={entity}
-                openModal={openRenderEntityEditor(index)}
+                openModal={renderEntityEditor(entity)}
                 commitUpdate={handleEntityDragEnd(index)}
                 commitRemove={removeEntity(index)} />)}
 
