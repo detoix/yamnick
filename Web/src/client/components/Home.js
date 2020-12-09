@@ -58,7 +58,10 @@ const Home = ({socket}) => {
       {
         imageId: 0,
         x: dropPosition.x,
-        y: dropPosition.y
+        y: dropPosition.y,
+        nameSectionHeight: 50,
+        membersSectionHeight: 0,
+        width: 150
       }
     ])
 

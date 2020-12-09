@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Paper, Grid, TextField, 
   Select, InputLabel, MenuItem } from '@material-ui/core';
-import { images } from '../utils/Consts'
+import { images, entityMemberRowHeight } from '../utils/Consts'
 
 const EntityEditor = props => {
   const [activeImageId, setActiveImageId] = useState(props.editable.imageId) //required to keep select value up-to-date
@@ -23,7 +23,8 @@ const EntityEditor = props => {
 
   const handleMembersChange = e => {
 
-    let newValue = e.target.value.split(/\n/)
+    let newValue = e.target.value
+      .split(/\n/).filter(input => input.length)
     let newBehavior = state => {
       let newState = behavior(state)
       newState.members = newValue
@@ -32,6 +33,8 @@ const EntityEditor = props => {
             name: memberName
           }
         })
+      newState.membersSectionHeight 
+        = newState.members.length * entityMemberRowHeight + Math.sign(newState.members.length) * 5
 
       return newState
     }
@@ -96,7 +99,9 @@ const EntityEditor = props => {
               multiline
               rows={4}
               variant="outlined"
-              defaultValue={(props.editable.members ?? [{name: ''}]).map(e => e.name).reduce((prev, curr) => prev + ("\n") + curr)}
+              defaultValue={props.editable.members && props.editable.members.length 
+                ? props.editable.members.map(e => e.name).reduce((prev, curr) => prev + ("\n") + curr)
+                : null}
               onChange={handleMembersChange} />
           </Grid>
         </Grid>

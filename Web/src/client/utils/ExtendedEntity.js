@@ -7,17 +7,21 @@ function ExtendedEntity(wrappee) {
   this.members = wrappee.members
   this.x = wrappee.x
   this.y = wrappee.y
-  this.height = 50 + (wrappee.members ? wrappee.members.length * 15 + 5 : 50)
-  this.width = 150
+  this.nameSectionHeight = wrappee.nameSectionHeight
+  this.membersSectionHeight = wrappee.membersSectionHeight
+  this.width = wrappee.width
+
+  this.height = () => this.nameSectionHeight + this.membersSectionHeight
+
   this.edgePoints = () => [
-    {x: this.x, y: this.y},
-    {x: this.x + this.width / 2, y: this.y},
-    {x: this.x + this.width, y: this.y},
-    {x: this.x + this.width, y: this.y + this.height / 2},
-    {x: this.x + this.width, y: this.y + this.height},
-    {x: this.x + this.width / 2, y: this.y + this.height},
-    {x: this.x, y: this.y + this.height},
-    {x: this.x, y: this.y + this.height / 2}
+    {x: this.x, y: this.y, direction: 'nw-resize'},
+    {x: this.x + this.width / 2, y: this.y, direction: 'n-resize'},
+    {x: this.x + this.width, y: this.y, direction: 'ne-resize'},
+    {x: this.x + this.width, y: this.y + this.height() / 2, direction: 'e-resize'},
+    {x: this.x + this.width, y: this.y + this.height(), direction: 'se-resize'},
+    {x: this.x + this.width / 2, y: this.y + this.height(), direction: 's-resize'},
+    {x: this.x, y: this.y + this.height(), direction: 'sw-resize'},
+    {x: this.x, y: this.y + this.height() / 2, direction: 'w-resize'}
   ]
 
   this.pointCloseTo = (x, y) => {
