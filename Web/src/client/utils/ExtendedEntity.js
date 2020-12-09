@@ -9,7 +9,7 @@ function ExtendedEntity(wrappee) {
   this.y = wrappee.y
   this.height = 50 + (wrappee.members ? wrappee.members.length * 15 + 5 : 50)
   this.width = 150
-  this.edgePoints = [
+  this.edgePoints = () => [
     {x: this.x, y: this.y},
     {x: this.x + this.width / 2, y: this.y},
     {x: this.x + this.width, y: this.y},
@@ -21,9 +21,10 @@ function ExtendedEntity(wrappee) {
   ]
 
   this.pointCloseTo = (x, y) => {
-    let result = this.edgePoints.find(
+    let tmpEdgePoints = this.edgePoints()
+    let result = tmpEdgePoints.find(
       point => this.pointIsInSnapArea(x, y, point.x, point.y))
-    let indexOfResult = this.edgePoints.indexOf(result);
+    let indexOfResult = tmpEdgePoints.indexOf(result);
 
     return [result, indexOfResult]
   }

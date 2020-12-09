@@ -30,7 +30,7 @@ const Entity = props => {
       onClick={commitRemove}
       draggable>
 
-      {props.state.edgePoints.map((snapPoint, index) => 
+      {props.state.edgePoints().map((snapPoint, index) => 
         <Circle 
           key={index} 
           x={snapPoint.x - props.state.x} 

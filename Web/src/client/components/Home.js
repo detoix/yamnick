@@ -19,7 +19,7 @@ const Home = ({socket}) => {
   useEffect(() => {
     socket.on("DIAGRAM_PERSISTED", data => {
       if (data.id == id) {
-        setEntities(data.classDefinitions
+        setEntities(data.entities
           .map(e => new ExtendedEntity(e)))
         setRelations(data.relations)
       }
@@ -39,7 +39,7 @@ const Home = ({socket}) => {
       diagram: 
       {
         id: id,
-        classDefinitions: upToDateEntities,
+        entities: upToDateEntities,
         relations: upToDateRelations
       }
     }

@@ -11,7 +11,7 @@ const io = socketIo(server)
 const sockets = new Set()
 const system = start(configurePersistence(new PostgresDocumentDBEngine(process.env.DATABASE_URL)))
 
-const diagramBehavior = async (state = { classDefinitions: [], relations: [] }, msg, ctx) => {
+const diagramBehavior = async (state = { entities: [], relations: [] }, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
 
   if (msg.type === "QUERY") {
@@ -19,18 +19,18 @@ const diagramBehavior = async (state = { classDefinitions: [], relations: [] }, 
   } else if (msg.type === "DIAGRAM") {
     if (!ctx.recovering) {
 
-      let idsInUse = new Set(state.classDefinitions.map(entity => entity.id))
+      let idsInUse = new Set()
       idsInUse.add(0)
-      // console.log(idsInUse, idsInUse.has(0), idsInUse.has(1), idsInUse.has(2))
+      if (state.entities) {
+        state.entities
+          .map(entity => entity.id)
+          .forEach(entityId => idsInUse.add(entityId))
+      }
 
       let availableId = Math.max(...idsInUse) + 1
-      // console.log([...idsInUse], availableId)
 
-      msg.payload.classDefinitions.forEach(entity => {
+      msg.payload.entities.forEach(entity => {
         if (!idsInUse.has(entity.id)) {
-
-          // console.log('updating id', availableId)
-
           entity.id = availableId
           availableId = availableId + 1
         }
