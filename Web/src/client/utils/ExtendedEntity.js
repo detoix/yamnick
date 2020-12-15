@@ -14,14 +14,14 @@ function ExtendedEntity(wrappee) {
   this.height = () => this.nameSectionHeight + this.membersSectionHeight
 
   this.edgePoints = () => [
-    {x: this.x, y: this.y, direction: 'nw-resize'},
-    {x: this.x + this.width / 2, y: this.y, direction: 'n-resize'},
-    {x: this.x + this.width, y: this.y, direction: 'ne-resize'},
+    {x: this.x, y: this.y, direction: 'default'},
+    {x: this.x + this.width / 2, y: this.y, direction: 'default'},
+    {x: this.x + this.width, y: this.y, direction: 'default'},
     {x: this.x + this.width, y: this.y + this.height() / 2, direction: 'e-resize'},
-    {x: this.x + this.width, y: this.y + this.height(), direction: 'se-resize'},
+    {x: this.x + this.width, y: this.y + this.height(), direction: 'default'},
     {x: this.x + this.width / 2, y: this.y + this.height(), direction: 's-resize'},
-    {x: this.x, y: this.y + this.height(), direction: 'sw-resize'},
-    {x: this.x, y: this.y + this.height() / 2, direction: 'w-resize'}
+    {x: this.x, y: this.y + this.height(), direction: 'default'},
+    {x: this.x, y: this.y + this.height() / 2, direction: 'default'}
   ]
 
   this.pointCloseTo = (x, y) => {

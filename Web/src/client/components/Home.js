@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
 import { Stage, Layer } from 'react-konva';
-import { Toolbar, Button } from '@material-ui/core';
+import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
 import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
@@ -15,6 +15,7 @@ const Home = ({socket}) => {
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
   const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
+  const [MaybeMenu, setMaybeMenu] = useState(() => props => null)
 
   useEffect(() => {
     socket.on("DIAGRAM_PERSISTED", data => {
@@ -89,14 +90,26 @@ const Home = ({socket}) => {
     setMaybeEntityEditor(() => props => {
       return <EntityEditor
         editable={entity}
-        handleClose={behavior => {
-          let indexOfEntity = props.entities.findIndex(e => e.id == entity.id)
-          let entityToUpdate = behavior(props.entities[indexOfEntity])
-
-          handleEntityDragEnd(indexOfEntity)(entityToUpdate)
-          setMaybeEntityEditor(() => props => null)
-        }}
+        handleClose={behavior => props.handleClose(behavior, entity)}
       />
+    })
+  }
+
+  const renderMenu = entity => e => {
+    e.evt.preventDefault();
+
+    setMaybeMenu(() => props => {
+      return <Menu
+        keepMounted
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: e.evt.y, left: e.evt.x }}
+        open={true}
+        onClose={() => setMaybeMenu(() => props => null)}
+        >
+          <MenuItem onClick={() => props.remove(entity)}>Delete</MenuItem>
+          <MenuItem>To Front</MenuItem>
+          <MenuItem>To Back</MenuItem>
+        </Menu>
     })
   }
 
@@ -107,7 +120,7 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, relations)
   }
 
-  const removeEntity = index => e => {
+  const removeEntity = index => {
     let upToDateEntities = [...entities]; // copying the old datas array
     upToDateEntities.splice(index, 1)
 
@@ -150,7 +163,20 @@ const Home = ({socket}) => {
           Relation
         </Button>
       </Toolbar>
-      <MaybeEntityEditor entities={entities} />
+      <MaybeEntityEditor handleClose={(behavior, entity) => {
+          let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+          let entityToUpdate = behavior(entities[indexOfEntity])
+
+          handleEntityDragEnd(indexOfEntity)(entityToUpdate)
+          setMaybeEntityEditor(() => props => null)
+        }} 
+      />
+      <MaybeMenu
+        remove={entity => {
+          let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+          removeEntity(indexOfEntity)
+          setMaybeMenu(() => props => null)
+        }} />
       <div
         id="container"
         style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
@@ -169,8 +195,9 @@ const Home = ({socket}) => {
                 key={index} 
                 state={entity}
                 openModal={renderEntityEditor(entity)}
+                onContextMenu={renderMenu(entity)}
                 commitUpdate={handleEntityDragEnd(index)}
-                commitRemove={removeEntity(index)} />)}
+                commitRemove={e => removeEntity(index)} />)}
 
             {relations && relations.map((relation, index) => 
               <Relation 
