@@ -36,7 +36,7 @@ const Relation = props => {
   
       if (snapEntity)
       {
-        newSnapPoint = snapEntity.edgePoints[node.entityHandle.snapNodeId]
+        newSnapPoint = snapEntity.edgePoints()[node.entityHandle.snapNodeId]
         snapEntityHandle = {
           entityId: snapEntity.id,
           snapNodeId: node.entityHandle.snapNodeId

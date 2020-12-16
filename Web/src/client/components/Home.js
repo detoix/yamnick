@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
 import { Stage, Layer } from 'react-konva';
-import { Toolbar, Button } from '@material-ui/core';
+import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
 import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
-import ExtendedEntity from '../utils/ExtendedEntity'
+import ExtendedEntity from './ExtendedEntity'
 
 const Home = ({socket}) => {
   const { id } = useParams()
@@ -15,39 +15,35 @@ const Home = ({socket}) => {
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
   const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
+  const [MaybeMenu, setMaybeMenu] = useState(() => props => null)
 
   useEffect(() => {
-    socket.on("diagram_persisted", data => {
-      let content = JSON.parse(data)
-      if (content.id === idInt()) {
-        setEntities(content.classDefinitions
+    socket.on("DIAGRAM_PERSISTED", data => {
+      if (data.id == id) {
+        setEntities(data.entities
           .map(e => new ExtendedEntity(e)))
-        setRelations(content.relations)
+        setRelations(data.relations)
       }
     })   
 
-    return () => socket.off('diagram_persisted')
+    return () => socket.off('DIAGRAM_PERSISTED')
   });
 
   useEffect(() => {
-    socket.emit("request_issued", JSON.stringify({
-            queryForDiagram: { id: idInt() }
-          }))
+    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: id } }))
   }, [id]);
-
-  const idInt = () => Number(id)
 
   const pushDiagramWith = (upToDateEntities, upToDateRelations) => {
     let request = {
       diagram: 
       {
-        id: idInt(),
-        classDefinitions: upToDateEntities,
+        id: id,
+        entities: upToDateEntities,
         relations: upToDateRelations
       }
     }
 
-    socket.emit("request_issued", JSON.stringify(request))
+    socket.emit("REQUEST_ISSUED", JSON.stringify(request))
   }
 
   const handleDrop = e => {
@@ -57,7 +53,17 @@ const Home = ({socket}) => {
     
     let dropPosition = stageRef.current.getPointerPosition()
 
-    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [dropPosition])
+    let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [
+      {
+        imageId: 0,
+        color: 0,
+        x: dropPosition.x,
+        y: dropPosition.y,
+        nameSectionHeight: 50,
+        membersSectionHeight: 0,
+        width: 150
+      }
+    ])
 
     let upToDateRelations = (relations ?? []).concat(draggedItemRef.current != 'relation' ? [] : [
       {
@@ -79,34 +85,37 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, upToDateRelations)
   }
 
-  const openRenderEntityEditor = index => e => {
+  const renderEntityEditor = entity => {
     setMaybeEntityEditor(() => props => {
       return <EntityEditor
-        editable={entities[index]}
-        handleClose={onModalClosed}
+        editable={entity}
+        handleClose={behavior => props.handleClose(behavior, entity)}
       />
     })
   }
 
-  const closeRenderEntityEditor = () => setMaybeEntityEditor(() => props => null)
+  const renderMenu = (e, entity) => {
+    e.evt.preventDefault();
 
-  const onModalClosed = (entityToUpdate) => {
-    let indexOfEntity = entities.findIndex(
-      e => e.id == entityToUpdate.id)
-    handleEntityDragEnd(indexOfEntity)(entityToUpdate)
-    closeRenderEntityEditor()
-  };
-
-  const handleEntityDragEnd = index => e => {
-    let upToDateEntities = [...entities]; // copying the old datas array
-    upToDateEntities[index] = e
-
-    pushDiagramWith(upToDateEntities, relations)
+    setMaybeMenu(() => props => {
+      return <Menu
+        keepMounted
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: e.evt.y, left: e.evt.x }}
+        open={true}
+        onClose={() => setMaybeMenu(() => props => null)}
+        >
+          <MenuItem onClick={() => props.remove(entity)}>Delete</MenuItem>
+          <MenuItem onClick={() => props.toFront(entity)}>To Front</MenuItem>
+          <MenuItem onClick={() => props.toBack(entity)}>To Back</MenuItem>
+        </Menu>
+    })
   }
 
-  const removeEntity = index => e => {
+  const updateEntity = entity => {
     let upToDateEntities = [...entities]; // copying the old datas array
-    upToDateEntities.splice(index, 1)
+    let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+    upToDateEntities[indexOfEntity] = entity
 
     pushDiagramWith(upToDateEntities, relations)
   }
@@ -123,6 +132,15 @@ const Home = ({socket}) => {
     upToDateRelations.splice(index, 1)
 
     pushDiagramWith(entities, upToDateRelations)
+  }
+
+  const arrangeEntities = (insertFunction, entity) => {
+    let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+    let upToDateEntities = [...entities]; // copying the old datas array
+    upToDateEntities.splice(indexOfEntity, 1)
+    insertFunction(upToDateEntities, entity)
+    pushDiagramWith(upToDateEntities, relations)
+    setMaybeMenu(() => props => null)
   }
 
   return (
@@ -147,7 +165,19 @@ const Home = ({socket}) => {
           Relation
         </Button>
       </Toolbar>
-      <MaybeEntityEditor />
+      <MaybeEntityEditor handleClose={(behavior, entity) => {
+          let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+          let entityToUpdate = behavior(entities[indexOfEntity])
+
+          updateEntity(entityToUpdate)
+          setMaybeEntityEditor(() => props => null)
+        }}
+      />
+      <MaybeMenu
+        remove={entity => arrangeEntities((array, item) => { }, entity)}
+        toFront={entity => arrangeEntities((array, item) => array.push(item), entity)}
+        toBack={entity => arrangeEntities((array, item) => array.unshift(item), entity)}
+      />
       <div
         id="container"
         style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
@@ -162,15 +192,16 @@ const Home = ({socket}) => {
         >
           <Layer>
             {entities && entities.map((entity, index) => 
-              <Entity 
+              <Entity
                 key={index} 
                 state={entity}
-                openModal={openRenderEntityEditor(index)}
-                commitUpdate={handleEntityDragEnd(index)}
-                commitRemove={removeEntity(index)} />)}
+                onContextMenu={e => renderMenu(e, entity)}
+                openModal={() => renderEntityEditor(entity)}
+                commitUpdate={updateEntity}
+                commitRemove={() => arrangeEntities((array, item) => { }, entity)} />)}
 
             {relations && relations.map((relation, index) => 
-              <Relation 
+              <Relation
                 key={index} 
                 id={relation.id}
                 start={relation.start}
