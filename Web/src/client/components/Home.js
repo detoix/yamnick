@@ -56,6 +56,7 @@ const Home = ({socket}) => {
     let upToDateEntities = (entities ?? []).concat(draggedItemRef.current != 'entity' ? [] : [
       {
         imageId: 0,
+        color: 0,
         x: dropPosition.x,
         y: dropPosition.y,
         nameSectionHeight: 50,
@@ -194,10 +195,10 @@ const Home = ({socket}) => {
               <Entity
                 key={index} 
                 state={entity}
-                openModal={e => renderEntityEditor(entity)}
                 onContextMenu={e => renderMenu(e, entity)}
-                commitUpdate={e => updateEntity(entity)}
-                commitRemove={e => arrangeEntities((array, item) => { }, entity)} />)}
+                openModal={() => renderEntityEditor(entity)}
+                commitUpdate={updateEntity}
+                commitRemove={() => arrangeEntities((array, item) => { }, entity)} />)}
 
             {relations && relations.map((relation, index) => 
               <Relation

@@ -3,7 +3,8 @@ import { snapPointRadius } from './Consts'
 function ExtendedEntity(wrappee) {
   this.id = wrappee.id
   this.name = wrappee.name
-  this.imageId = Number(wrappee.imageId)
+  this.imageId = wrappee.imageId
+  this.color = wrappee.color
   this.members = wrappee.members
   this.x = wrappee.x
   this.y = wrappee.y

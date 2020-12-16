@@ -10,10 +10,19 @@ const images = [
   dog,
   duck
 ]
+const colors = [
+  '#ffffff',
+  '#ffe6cc',
+  '#d5e8d4',
+  '#f8cecc',
+  '#dae8fc',
+  '#e1d5e7'
+]
 
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
   entityMemberRowHeight,
-  images 
+  images,
+  colors
 }

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Image, Circle } from 'react-konva';
-import { images, entityMemberRowHeight, snapPointRadius, snapPointVisibleRadius } from '../utils/Consts'
+import { images, colors, entityMemberRowHeight, snapPointRadius, snapPointVisibleRadius } from '../utils/Consts'
 import useImage from 'use-image'
 
 const Entity = props => {
   const [image] = useImage(images[props.state.imageId]);
-
-  const openModal = e => props.openModal()
 
   const commitUpdate = e => {
     if (e.target.attrs.resizeNode) {
@@ -29,7 +27,7 @@ const Entity = props => {
     <Group
       x={props.state.x}
       y={props.state.y}
-      onDblclick={openModal}
+      onDblclick={e => props.openModal()}
       onDragEnd={commitUpdate}
       onClick={commitRemove}
       onContextMenu={props.onContextMenu}
@@ -50,7 +48,7 @@ const Entity = props => {
         width={props.state.width}
         height={props.state.nameSectionHeight}
         stroke='black'
-        fill='red'
+        fill={colors[props.state.color]}
         strokeWidth={1}
       />
 
@@ -62,7 +60,7 @@ const Entity = props => {
           width={props.state.width}
           height={props.state.membersSectionHeight}
           stroke='black'
-          fill='white'
+          fill={colors[props.state.color]}
           strokeWidth={1} />)}
       
       <Text
