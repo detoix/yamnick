@@ -1,4 +1,4 @@
-import { snapPointRadius } from './Consts'
+import { snapPointRadius } from '../utils/Consts'
 
 function ExtendedEntity(wrappee) {
   this.id = wrappee.id
@@ -18,9 +18,9 @@ function ExtendedEntity(wrappee) {
     {x: this.x, y: this.y, direction: 'default'},
     {x: this.x + this.width / 2, y: this.y, direction: 'default'},
     {x: this.x + this.width, y: this.y, direction: 'default'},
-    {x: this.x + this.width, y: this.y + this.height() / 2, direction: 'e-resize'},
-    {x: this.x + this.width, y: this.y + this.height(), direction: 'default'},
-    {x: this.x + this.width / 2, y: this.y + this.height(), direction: 's-resize'},
+    {x: this.x + this.width, y: this.y + this.height() / 2, direction: 'default'},
+    {x: this.x + this.width, y: this.y + this.height(), direction: 'se-resize'},
+    {x: this.x + this.width / 2, y: this.y + this.height(), direction: 'default'},
     {x: this.x, y: this.y + this.height(), direction: 'default'},
     {x: this.x, y: this.y + this.height() / 2, direction: 'default'}
   ]

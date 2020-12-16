@@ -6,7 +6,7 @@ import { Class, ArrowRightAlt } from '@material-ui/icons'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
-import ExtendedEntity from '../utils/ExtendedEntity'
+import ExtendedEntity from './ExtendedEntity'
 
 const Home = ({socket}) => {
   const { id } = useParams()

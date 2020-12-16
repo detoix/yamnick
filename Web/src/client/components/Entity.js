@@ -103,27 +103,11 @@ const Entity = props => {
             const container = e.target.getStage().container();
             container.style.cursor = "default";
           }}
-          dragBoundFunc={pos => {
-            if (snapPoint.direction === "e-resize") {
-              return {
-                x : pos.x,
-                y : snapPoint.y
-              }
-            } else if (snapPoint.direction === "s-resize") {
-              return {
-                x : snapPoint.x,
-                y : pos.y
-              }
-            }
-          }}
           onDragEnd={e => {
-            if (snapPoint.direction === "e-resize") {
+            if (snapPoint.direction === "se-resize") {
+              let ratio = props.state.membersSectionHeight / (props.state.membersSectionHeight + props.state.nameSectionHeight)
               let clone = {...props.state}
               clone.width = e.target.attrs['x']
-              props.commitUpdate(clone)
-            } else if (snapPoint.direction === "s-resize") {
-              let ratio = props.state.membersSectionHeight / (props.state.membersSectionHeight + props.state.nameSectionHeight) 
-              let clone = {...props.state}
               clone.nameSectionHeight = e.target.attrs['y'] * (1.0 - ratio)
               clone.membersSectionHeight = e.target.attrs['y'] * ratio
               props.commitUpdate(clone)
