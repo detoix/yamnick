@@ -30,10 +30,8 @@ const Home = ({socket}) => {
   });
 
   useEffect(() => {
-    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: idInt() } }))
+    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: id } }))
   }, [id]);
-
-  const idInt = () => Number(id)
 
   const pushDiagramWith = (upToDateEntities, upToDateRelations) => {
     let request = {
@@ -86,7 +84,7 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, upToDateRelations)
   }
 
-  const renderEntityEditor = entity => e => {
+  const renderEntityEditor = entity => {
     setMaybeEntityEditor(() => props => {
       return <EntityEditor
         editable={entity}
@@ -95,7 +93,7 @@ const Home = ({socket}) => {
     })
   }
 
-  const renderMenu = entity => e => {
+  const renderMenu = (e, entity) => {
     e.evt.preventDefault();
 
     setMaybeMenu(() => props => {
@@ -107,22 +105,16 @@ const Home = ({socket}) => {
         onClose={() => setMaybeMenu(() => props => null)}
         >
           <MenuItem onClick={() => props.remove(entity)}>Delete</MenuItem>
-          <MenuItem>To Front</MenuItem>
-          <MenuItem>To Back</MenuItem>
+          <MenuItem onClick={() => props.toFront(entity)}>To Front</MenuItem>
+          <MenuItem onClick={() => props.toBack(entity)}>To Back</MenuItem>
         </Menu>
     })
   }
 
-  const handleEntityDragEnd = index => e => {
+  const updateEntity = entity => {
     let upToDateEntities = [...entities]; // copying the old datas array
-    upToDateEntities[index] = e
-
-    pushDiagramWith(upToDateEntities, relations)
-  }
-
-  const removeEntity = index => {
-    let upToDateEntities = [...entities]; // copying the old datas array
-    upToDateEntities.splice(index, 1)
+    let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+    upToDateEntities[indexOfEntity] = entity
 
     pushDiagramWith(upToDateEntities, relations)
   }
@@ -139,6 +131,15 @@ const Home = ({socket}) => {
     upToDateRelations.splice(index, 1)
 
     pushDiagramWith(entities, upToDateRelations)
+  }
+
+  const arrangeEntities = (insertFunction, entity) => {
+    let indexOfEntity = entities.findIndex(e => e.id == entity.id)
+    let upToDateEntities = [...entities]; // copying the old datas array
+    upToDateEntities.splice(indexOfEntity, 1)
+    insertFunction(upToDateEntities, entity)
+    pushDiagramWith(upToDateEntities, relations)
+    setMaybeMenu(() => props => null)
   }
 
   return (
@@ -167,16 +168,15 @@ const Home = ({socket}) => {
           let indexOfEntity = entities.findIndex(e => e.id == entity.id)
           let entityToUpdate = behavior(entities[indexOfEntity])
 
-          handleEntityDragEnd(indexOfEntity)(entityToUpdate)
+          updateEntity(entityToUpdate)
           setMaybeEntityEditor(() => props => null)
-        }} 
+        }}
       />
       <MaybeMenu
-        remove={entity => {
-          let indexOfEntity = entities.findIndex(e => e.id == entity.id)
-          removeEntity(indexOfEntity)
-          setMaybeMenu(() => props => null)
-        }} />
+        remove={entity => arrangeEntities((array, item) => { }, entity)}
+        toFront={entity => arrangeEntities((array, item) => array.push(item), entity)}
+        toBack={entity => arrangeEntities((array, item) => array.unshift(item), entity)}
+      />
       <div
         id="container"
         style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
@@ -191,16 +191,16 @@ const Home = ({socket}) => {
         >
           <Layer>
             {entities && entities.map((entity, index) => 
-              <Entity 
+              <Entity
                 key={index} 
                 state={entity}
-                openModal={renderEntityEditor(entity)}
-                onContextMenu={renderMenu(entity)}
-                commitUpdate={handleEntityDragEnd(index)}
-                commitRemove={e => removeEntity(index)} />)}
+                openModal={e => renderEntityEditor(entity)}
+                onContextMenu={e => renderMenu(e, entity)}
+                commitUpdate={e => updateEntity(entity)}
+                commitRemove={e => arrangeEntities((array, item) => { }, entity)} />)}
 
             {relations && relations.map((relation, index) => 
-              <Relation 
+              <Relation
                 key={index} 
                 id={relation.id}
                 start={relation.start}
