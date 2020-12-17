@@ -23,6 +23,9 @@ const Home = ({socket}) => {
         setEntities(data.entities
           .map(e => new ExtendedEntity(e)))
         setRelations(data.relations)
+      } else if (!data.id) {
+        setEntities([])
+        setRelations([])
       }
     })   
 
@@ -198,6 +201,11 @@ const Home = ({socket}) => {
                 onContextMenu={e => renderMenu(e, entity)}
                 openModal={() => renderEntityEditor(entity)}
                 commitUpdate={updateEntity}
+                resize={resizedEntity => {
+                  let upToDateEntities = [...entities]
+                  upToDateEntities[index] = new ExtendedEntity(resizedEntity)
+                  setEntities(upToDateEntities)
+                }}
                 commitRemove={() => arrangeEntities((array, item) => { }, entity)} />)}
 
             {relations && relations.map((relation, index) => 

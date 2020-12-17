@@ -23,6 +23,17 @@ const Entity = props => {
     }
   }
 
+  const changeSize = (e, snapPoint, resizeFunc) => {
+    if (snapPoint.direction === "se-resize") {
+      let ratio = props.state.membersSectionHeight / (props.state.membersSectionHeight + props.state.nameSectionHeight)
+      let clone = {...props.state}
+      clone.width = e.target.attrs['x']
+      clone.nameSectionHeight = e.target.attrs['y'] * (1.0 - ratio)
+      clone.membersSectionHeight = e.target.attrs['y'] * ratio
+      resizeFunc(clone)
+    }
+  }
+
   return (
     <Group
       x={props.state.x}
@@ -103,16 +114,8 @@ const Entity = props => {
             const container = e.target.getStage().container();
             container.style.cursor = "default";
           }}
-          onDragEnd={e => {
-            if (snapPoint.direction === "se-resize") {
-              let ratio = props.state.membersSectionHeight / (props.state.membersSectionHeight + props.state.nameSectionHeight)
-              let clone = {...props.state}
-              clone.width = e.target.attrs['x']
-              clone.nameSectionHeight = e.target.attrs['y'] * (1.0 - ratio)
-              clone.membersSectionHeight = e.target.attrs['y'] * ratio
-              props.commitUpdate(clone)
-            }
-          }}
+          onDragMove={e => changeSize(e, snapPoint, props.resize)}
+          onDragEnd={e => changeSize(e, snapPoint, props.commitUpdate)}
           resizeNode
           draggable
           />)}

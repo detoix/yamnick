@@ -9,7 +9,7 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIo(server)
 const sockets = new Set()
-const system = start(configurePersistence(new PostgresDocumentDBEngine(process.env.DATABASE_URL)))
+const system = start(configurePersistence(new PostgresDocumentDBEngine(process.env.HEROKU_POSTGRESQL_ONYX_URL)))
 
 const diagramBehavior = async (state = { entities: [], relations: [] }, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
