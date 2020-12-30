@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, queryHelpers, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/extend-expect'
-import { colors } from '../client/utils/Consts'
+import { colors } from '../client/utils/utils'
 import EntityEditor from '../client/components/EntityEditor'
 import ExtendedEntity from '../client/components/ExtendedEntity'
 

@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
 import { Stage, Layer } from 'react-konva';
 import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
-import { Class, ArrowRightAlt } from '@material-ui/icons'
+import { Class, ArrowRightAlt, GetApp } from '@material-ui/icons'
+import { downloadURI } from '../utils/utils'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
@@ -146,6 +147,8 @@ const Home = ({socket}) => {
     setMaybeMenu(() => props => null)
   }
 
+  
+
   return (
     <div>
       <Toolbar>
@@ -166,6 +169,12 @@ const Home = ({socket}) => {
           }}>
           <ArrowRightAlt />
           Relation
+        </Button>
+        <Button
+          disableRipple={true}
+          onClick={e => downloadURI(stageRef.current.toDataURL())}>
+          <GetApp />
+          Diagram
         </Button>
       </Toolbar>
       <MaybeEntityEditor handleClose={(behavior, entity) => {

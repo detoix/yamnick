@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Paper, Box, Button, TextField, 
   Select, MenuItem } from '@material-ui/core';
-import { images, colors, entityMemberRowHeight } from '../utils/Consts'
+import { images, colors, entityMemberRowHeight } from '../utils/utils'
 
 const EntityEditor = props => {
   const [activeImageId, setActiveImageId] = useState(props.editable.imageId) //required to keep select value up-to-date
@@ -124,7 +124,7 @@ const EntityEditor = props => {
               MenuProps={{ "data-testid": "image-option"}}
             >
               {images.map((image, index) => 
-                <MenuItem value={index} key={index}><img src={image} height={25} width={25} />{image}</MenuItem> 
+                <MenuItem value={index} key={index}><img src={image} height={25} width={25} /></MenuItem> 
               )}
             </Select>
           </Box>

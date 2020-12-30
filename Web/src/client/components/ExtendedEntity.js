@@ -1,4 +1,4 @@
-import { snapPointRadius } from '../utils/Consts'
+import { snapPointRadius } from '../utils/utils'
 
 function ExtendedEntity(wrappee) {
   this.id = wrappee.id

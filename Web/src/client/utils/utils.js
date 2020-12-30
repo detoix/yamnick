@@ -19,10 +19,21 @@ const colors = [
   '#e1d5e7'
 ]
 
+// function from https://stackoverflow.com/a/15832662/512042
+const downloadURI = (uri, name) => {
+  var link = document.createElement('a');
+  link.download = name;
+  link.href = uri;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
   entityMemberRowHeight,
   images,
-  colors
+  colors,
+  downloadURI
 }

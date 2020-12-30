@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
-import { snapPointRadius } from '../utils/Consts'
+import { snapPointRadius } from '../utils/utils'
 
 const Relation = props => {
   const [start, setStart] = useState({...props.start})

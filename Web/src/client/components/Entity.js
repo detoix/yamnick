@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Image, Circle } from 'react-konva';
-import { images, colors, entityMemberRowHeight, snapPointRadius, snapPointVisibleRadius } from '../utils/Consts'
+import { images, colors, entityMemberRowHeight, snapPointRadius, snapPointVisibleRadius } from '../utils/utils'
 import useImage from 'use-image'
 
 const Entity = props => {
