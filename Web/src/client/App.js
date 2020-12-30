@@ -13,7 +13,9 @@ const App = () => {
 
   useEffect(() => {
     const authorize = async () => {
-      // const socket = socketIOClient("https://secure-brushlands-76941.herokuapp.com")
+      // const socket = socketIOClient("https://secure-brushlands-76941.herokuapp.com", {
+      //   transports: ['websocket'],
+      // })
       const socket = socketIOClient(window.location.origin)
       socket.once('SERVER_READY', () => {
         setSocket(socket)
