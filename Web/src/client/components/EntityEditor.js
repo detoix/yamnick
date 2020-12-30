@@ -94,6 +94,7 @@ const EntityEditor = props => {
         >
           <Box m={1}>
             <TextField 
+              id="name"
               label="Name" 
               fullWidth
               variant="outlined"
@@ -105,9 +106,12 @@ const EntityEditor = props => {
               value={activeColor}
               onChange={handleColorChange}
               variant="outlined"
+              SelectDisplayProps={{ "data-testid": "color-selector" }}
             >
               {colors.map((color, index) => 
-                <MenuItem value={index} key={index}><Button style={{ backgroundColor: color }}> </Button></MenuItem> 
+                <MenuItem value={index} key={index}>
+                  <Button style={{ backgroundColor: color, color: color }}>{color}</Button>
+                </MenuItem> 
               )}
             </Select>
           </Box>
@@ -116,9 +120,11 @@ const EntityEditor = props => {
               value={activeImageId}
               onChange={handleImageChange}
               variant="outlined"
+              SelectDisplayProps={{ "data-testid": "image-selector" }}
+              MenuProps={{ "data-testid": "image-option"}}
             >
               {images.map((image, index) => 
-                <MenuItem value={index} key={index}><img src={image} height={25} width={25} /></MenuItem> 
+                <MenuItem value={index} key={index}><img src={image} height={25} width={25} />{image}</MenuItem> 
               )}
             </Select>
           </Box>
@@ -129,6 +135,7 @@ const EntityEditor = props => {
         >
           <Box m={1} flexGrow={1}>
             <TextField
+              id="members"
               label="Members"
               fullWidth
               multiline
