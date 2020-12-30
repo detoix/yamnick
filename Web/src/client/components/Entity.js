@@ -6,7 +6,7 @@ import useImage from 'use-image'
 const Entity = props => {
   const [image] = useImage(images[props.state.imageId]);
 
-  const commitUpdate = e => {
+  const changePosition = (e, updateFunc) => {
     if (e.target.attrs.resizeNode) {
       return
     }
@@ -14,7 +14,7 @@ const Entity = props => {
     let clone = {...props.state}
     clone.x = e.target.attrs['x']
     clone.y = e.target.attrs['y']
-    props.commitUpdate(clone)
+    updateFunc(clone)
   }
 
   const commitRemove = e => {
@@ -39,7 +39,8 @@ const Entity = props => {
       x={props.state.x}
       y={props.state.y}
       onDblclick={e => props.openModal()}
-      onDragEnd={commitUpdate}
+      onDragMove={e => changePosition(e, props.localUpdate)}
+      onDragEnd={e => changePosition(e, props.commitUpdate)}
       onClick={commitRemove}
       onContextMenu={props.onContextMenu}
       draggable>
@@ -114,7 +115,7 @@ const Entity = props => {
             const container = e.target.getStage().container();
             container.style.cursor = "default";
           }}
-          onDragMove={e => changeSize(e, snapPoint, props.resize)}
+          onDragMove={e => changeSize(e, snapPoint, props.localUpdate)}
           onDragEnd={e => changeSize(e, snapPoint, props.commitUpdate)}
           resizeNode
           draggable

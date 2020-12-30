@@ -201,7 +201,7 @@ const Home = ({socket}) => {
                 onContextMenu={e => renderMenu(e, entity)}
                 openModal={() => renderEntityEditor(entity)}
                 commitUpdate={updateEntity}
-                resize={resizedEntity => {
+                localUpdate={resizedEntity => {
                   let upToDateEntities = [...entities]
                   upToDateEntities[index] = new ExtendedEntity(resizedEntity)
                   setEntities(upToDateEntities)
