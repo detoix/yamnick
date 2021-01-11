@@ -29,11 +29,25 @@ const downloadURI = (uri, name) => {
   document.body.removeChild(link);
 }
 
+const getModalStyle = () => {
+  const top = 50;
+  const left = 50;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+    position: 'absolute',
+    padding: '10px'
+  };
+}
+
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
   entityMemberRowHeight,
   images,
   colors,
-  downloadURI
+  downloadURI,
+  getModalStyle
 }

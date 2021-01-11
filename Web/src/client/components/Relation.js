@@ -94,7 +94,9 @@ const Relation = props => {
 
   return (
     <Group
-      onClick={commitRemove}>
+      onClick={commitRemove}
+      onDblclick={e => props.openModal()}
+    >
       <Arrow
         points={[start.point.x, start.point.y, end.point.x, end.point.y]}
         fill='white'

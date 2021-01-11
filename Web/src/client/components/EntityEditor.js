@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Paper, Box, Button, TextField, 
   Select, MenuItem } from '@material-ui/core';
-import { images, colors, entityMemberRowHeight } from '../utils/utils'
+import { images, colors, entityMemberRowHeight, getModalStyle } from '../utils/utils'
 
 const EntityEditor = props => {
   const [activeImageId, setActiveImageId] = useState(props.editable.imageId) //required to keep select value up-to-date
   const [activeColor, setActiveColor] = useState(props.editable.color) //required to keep select value up-to-date
   const [behavior, setBehavior] = useState(() => state => state)
 
-  const handleClose = () => props.handleClose(behavior)
-  
   const handleNameChange = e => {
     let newValue = e.target.value
     let newBehavior = state => {
@@ -71,21 +69,8 @@ const EntityEditor = props => {
     setBehavior(() => newBehavior)
   }
 
-  const getModalStyle = () => {
-    const top = 50;
-    const left = 50;
-  
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(-${top}%, -${left}%)`,
-      position: 'absolute',
-      padding: '10px'
-    };
-  }
-
   return (
-    <Modal open={true} onClose={handleClose}>
+    <Modal open={true} onClose={() => props.handleClose(behavior)}>
       <Paper style={getModalStyle()}>
         <Box
           display="flex"

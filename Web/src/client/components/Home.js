@@ -8,6 +8,7 @@ import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
 import ExtendedEntity from './ExtendedEntity'
+import RelationEditor from './RelationEditor'
 
 const Home = ({socket}) => {
   const { id } = useParams()
@@ -93,7 +94,16 @@ const Home = ({socket}) => {
     setMaybeEntityEditor(() => props => {
       return <EntityEditor
         editable={entity}
-        handleClose={behavior => props.handleClose(behavior, entity)}
+        handleClose={behavior => props.updateEntity(behavior, entity)}
+      />
+    })
+  }
+
+  const renderRelationEditor = relation => {
+    setMaybeEntityEditor(() => props => {
+      return <RelationEditor
+        editable={relation}
+        handleClose={behavior => props.updateRelation(behavior, relation)}
       />
     })
   }
@@ -124,7 +134,7 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, relations)
   }
 
-  const handleRelationDragEnd = index => e => {
+  const updateRelation = index => e => {
     let upToDateRelations = [...relations]; // copying the old datas array
     upToDateRelations[index] = e
 
@@ -196,11 +206,15 @@ const Home = ({socket}) => {
           Diagram
         </Button>
       </Toolbar>
-      <MaybeEntityEditor handleClose={(behavior, entity) => {
+      <MaybeEntityEditor 
+        updateEntity={(behavior, entity) => {
           let indexOfEntity = entities.findIndex(e => e.id == entity.id)
           let entityToUpdate = behavior(entities[indexOfEntity])
 
           updateEntity(entityToUpdate)
+          setMaybeEntityEditor(() => props => null)
+        }}
+        updateRelation={(behavior, relation) => {
           setMaybeEntityEditor(() => props => null)
         }}
       />
@@ -244,7 +258,8 @@ const Home = ({socket}) => {
                 start={relation.start}
                 end={relation.end}
                 entities={entities}
-                commitUpdate={handleRelationDragEnd(index)}
+                openModal={() => renderRelationEditor(relation)}
+                commitUpdate={updateRelation(index)}
                 commitRemove={removeRelation(index)} />)}
 
           </Layer>
