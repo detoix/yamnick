@@ -147,7 +147,26 @@ const Home = ({socket}) => {
     setMaybeMenu(() => props => null)
   }
 
-  
+  const handleWheel = e => {
+    if (e.evt.ctrlKey) {
+      e.evt.preventDefault()
+
+      let scaleBy = 1.02
+      let stage = e.target.getStage()
+      let oldScale = stage.scaleX()
+      let mousePointTo = {
+        x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+        y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+      }
+      let newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy
+
+      stage.scaleX(newScale)
+      stage.scaleY(newScale)
+      stage.x(-(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale)
+      stage.y(-(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale)
+      stage.draw()
+    }
+  }
 
   return (
     <div>
@@ -201,6 +220,7 @@ const Home = ({socket}) => {
           width={2000}
           height={1000}
           ref={stageRef}
+          onWheel={handleWheel}
         >
           <Layer>
             {entities && entities.map((entity, index) => 
