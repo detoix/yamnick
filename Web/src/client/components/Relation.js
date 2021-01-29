@@ -84,7 +84,7 @@ const Relation = props => {
         fill={props.state.endStyle ?? arrowFills[0]}
         stroke='black'
         strokeWidth={props.state.thickness ?? 1}
-        dash={props.state.dash == none ? null : JSON.parse(props.state.dash)}
+        dash={props.state.dash && props.state.dash != none ? JSON.parse(props.state.dash) : null}
       />
       <Circle
         draggable
