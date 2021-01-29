@@ -134,16 +134,9 @@ const Home = ({socket}) => {
     pushDiagramWith(upToDateEntities, relations)
   }
 
-  const updateRelation = index => e => {
+  const updateRelation = (index, e) => {
     let upToDateRelations = [...relations]; // copying the old datas array
     upToDateRelations[index] = e
-
-    pushDiagramWith(entities, upToDateRelations)
-  }
-
-  const removeRelation = index => e => {
-    let upToDateRelations = [...relations]; // copying the old datas array
-    upToDateRelations.splice(index, 1)
 
     pushDiagramWith(entities, upToDateRelations)
   }
@@ -215,6 +208,10 @@ const Home = ({socket}) => {
           setMaybeEntityEditor(() => props => null)
         }}
         updateRelation={(behavior, relation) => {
+          let indexOfRelation = relations.findIndex(e => e.id == relation.id)
+          let relationToUpdate = behavior(relations[indexOfRelation])
+
+          updateRelation(indexOfRelation, relationToUpdate)
           setMaybeEntityEditor(() => props => null)
         }}
       />
@@ -254,13 +251,21 @@ const Home = ({socket}) => {
             {relations && relations.map((relation, index) => 
               <Relation
                 key={index} 
-                id={relation.id}
-                start={relation.start}
-                end={relation.end}
+                state={relation}
                 entities={entities}
                 openModal={() => renderRelationEditor(relation)}
-                commitUpdate={updateRelation(index)}
-                commitRemove={removeRelation(index)} />)}
+                localUpdate={result => {
+                  let upToDateRelations = [...relations]
+                  upToDateRelations[index] = result
+                  setRelations(upToDateRelations)
+                }}
+                commitUpdate={rel => updateRelation(index, rel)}
+                commitRemove={() => {
+                  let upToDateRelations = [...relations]; // copying the old datas array
+                  upToDateRelations.splice(index, 1)
+                  pushDiagramWith(entities, upToDateRelations)
+                }} 
+              />)}
 
           </Layer>
         </Stage>

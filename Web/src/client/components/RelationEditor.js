@@ -6,14 +6,24 @@ import { getModalStyle, colors } from '../utils/utils'
 const RelationEditor = props => {
   const [behavior, setBehavior] = useState(() => state => state)
 
-  const handleClose = () => props.handleClose(behavior)
+  const handleThicknessChange = e => {
+    let newValue = e.target.value
+    let newBehavior = state => {
+      let newState = behavior(state)
+      newState.thickness = newValue
+
+      return newState
+    }
+
+    setBehavior(() => newBehavior)
+  }
 
   const selectStyle = {
     width: "100%"
   }
   
   return (
-    <Modal open={true} onClose={handleClose}>
+    <Modal open={true} onClose={() => props.handleClose(behavior)}>
       <Paper style={getModalStyle()}>
         <Grid container spacing={2} justify="space-evenly">
           <Grid item xs={4}>
@@ -76,7 +86,7 @@ const RelationEditor = props => {
             <Select
               style={selectStyle}
               value={3}
-              // onChange={handleColorChange}
+              onChange={handleThicknessChange}
               variant="outlined"
             >
               {colors.map((color, index) => 

@@ -3,23 +3,8 @@ import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
 import { snapPointRadius } from '../utils/utils'
 
 const Relation = props => {
-  const [start, setStart] = useState({...props.start})
-  const [end, setEnd] = useState({...props.end})
 
-  useEffect(() => {
-    trySnapById(setStart, props.start)
-  }, [props.start])
-
-  useEffect(() => {
-    trySnapById(setEnd, props.end)
-  }, [props.end])
-
-  useEffect(() => {
-    trySnapById(setStart, start)
-    trySnapById(setEnd, end)
-  }, [props.entities]);
-
-  const trySnapById = (setPoint, node) => {
+  const trySnapById = node => {
     let newSnapPoint = {
       x: node.point.x,
       y: node.point.y,
@@ -42,15 +27,15 @@ const Relation = props => {
           snapNodeId: node.entityHandle.snapNodeId
         }
       }
-  
-      setPoint({
-        point: newSnapPoint,
-        entityHandle: snapEntityHandle
-      })
     }   
+
+    return {
+      point: newSnapPoint,
+      entityHandle: snapEntityHandle
+    }
   }
 
-  const trySnapByPosition = (setPoint, e) => {
+  const trySnapByPosition = e => {
     let x = e.target.attrs['x']
     let y = e.target.attrs['y']
     let newSnapPoint = {
@@ -73,17 +58,10 @@ const Relation = props => {
       }
     })
 
-    setPoint({
+    return {
       point: newSnapPoint,
       entityHandle: snapEntityHandle
-    })
-  }
-
-  const commitUpdate = e => {
-    props.commitUpdate({
-      start: start,
-      end: end
-    })
+    }
   }
 
   const commitRemove = e => {
@@ -92,13 +70,17 @@ const Relation = props => {
     }
   }
 
+  let start = trySnapById(props.state.start)
+  let end = trySnapById(props.state.end)
+
   return (
     <Group
       onClick={commitRemove}
       onDblclick={e => props.openModal()}
     >
       <Arrow
-        points={[start.point.x, start.point.y, end.point.x, end.point.y]}
+        points={[start.point.x, start.point.y, end.point.x, end.point.y
+        ]}
         fill='white'
         stroke='black'
         strokeWidth={1}
@@ -107,8 +89,18 @@ const Relation = props => {
         draggable
         x={start.point.x}
         y={start.point.y}
-        onDragMove={e => trySnapByPosition(setStart, e)}
-        onDragEnd={commitUpdate}
+        onDragMove={e => {
+          props.localUpdate({
+            start: trySnapByPosition(e),
+            end: end
+          })
+        }}
+        onDragEnd={e => {
+          props.commitUpdate({
+            start: trySnapByPosition(e),
+            end: end
+          })
+        }}
         opacity={0}
         radius={snapPointRadius}
       />
@@ -116,8 +108,18 @@ const Relation = props => {
         draggable
         x={end.point.x}
         y={end.point.y}
-        onDragMove={e => trySnapByPosition(setEnd, e)}
-        onDragEnd={commitUpdate}
+        onDragMove={e => {
+          props.localUpdate({
+            start: start,
+            end: trySnapByPosition(e)
+          })
+        }}
+        onDragEnd={e => {
+          props.commitUpdate({
+            start: start,
+            end: trySnapByPosition(e)
+          })
+        }}
         opacity={0}
         radius={snapPointRadius}
       />
