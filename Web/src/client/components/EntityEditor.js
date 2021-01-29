@@ -4,8 +4,6 @@ import { Modal, Paper, Box, Button, TextField,
 import { images, colors, entityMemberRowHeight, getModalStyle } from '../utils/utils'
 
 const EntityEditor = props => {
-  const [activeImageId, setActiveImageId] = useState(props.editable.imageId) //required to keep select value up-to-date
-  const [activeColor, setActiveColor] = useState(props.editable.color) //required to keep select value up-to-date
   const [behavior, setBehavior] = useState(() => state => state)
 
   const handleNameChange = e => {
@@ -42,7 +40,6 @@ const EntityEditor = props => {
   }
 
   const handleImageChange = e => {
-    setActiveImageId(e.target.value) //required to keep select value up-to-date
 
     let newValue = e.target.value
     let newBehavior = state => {
@@ -56,7 +53,6 @@ const EntityEditor = props => {
   }
 
   const handleColorChange = e => {
-    setActiveColor(e.target.value) //required to keep select value up-to-date
 
     let newValue = e.target.value
     let newBehavior = state => {
@@ -88,7 +84,7 @@ const EntityEditor = props => {
           </Box>
           <Box m={1}>
             <Select
-              value={activeColor}
+              value={behavior(props.editable).color}
               onChange={handleColorChange}
               variant="outlined"
               SelectDisplayProps={{ "data-testid": "color-selector" }}
@@ -102,7 +98,7 @@ const EntityEditor = props => {
           </Box>
           <Box m={1}>
             <Select
-              value={activeImageId}
+              value={behavior(props.editable).imageId}
               onChange={handleImageChange}
               variant="outlined"
               SelectDisplayProps={{ "data-testid": "image-selector" }}

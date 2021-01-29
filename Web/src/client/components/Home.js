@@ -154,7 +154,7 @@ const Home = ({socket}) => {
     if (e.evt.ctrlKey) {
       e.evt.preventDefault()
 
-      let scaleBy = 1.02
+      let scaleBy = 1.03
       let stage = e.target.getStage()
       let oldScale = stage.scaleX()
       let mousePointTo = {
@@ -208,7 +208,9 @@ const Home = ({socket}) => {
           setMaybeEntityEditor(() => props => null)
         }}
         updateRelation={(behavior, relation) => {
-          let indexOfRelation = relations.findIndex(e => e.id == relation.id)
+          let indexOfRelation = relations.findIndex(e => 
+            e.start.point.x == relation.start.point.x 
+            && e.start.point.y == relation.start.point.y)
           let relationToUpdate = behavior(relations[indexOfRelation])
 
           updateRelation(indexOfRelation, relationToUpdate)
@@ -254,12 +256,12 @@ const Home = ({socket}) => {
                 state={relation}
                 entities={entities}
                 openModal={() => renderRelationEditor(relation)}
+                commitUpdate={rel => updateRelation(index, rel)}
                 localUpdate={result => {
                   let upToDateRelations = [...relations]
                   upToDateRelations[index] = result
                   setRelations(upToDateRelations)
                 }}
-                commitUpdate={rel => updateRelation(index, rel)}
                 commitRemove={() => {
                   let upToDateRelations = [...relations]; // copying the old datas array
                   upToDateRelations.splice(index, 1)

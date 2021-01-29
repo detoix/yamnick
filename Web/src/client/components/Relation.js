@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
-import { snapPointRadius } from '../utils/utils'
+import { snapPointRadius, none } from '../utils/utils'
 
 const Relation = props => {
 
@@ -83,23 +83,22 @@ const Relation = props => {
         ]}
         fill='white'
         stroke='black'
-        strokeWidth={1}
+        strokeWidth={props.state.thickness ?? 1}
+        dash={props.state.dash == none ? null : JSON.parse(props.state.dash)}
       />
       <Circle
         draggable
         x={start.point.x}
         y={start.point.y}
         onDragMove={e => {
-          props.localUpdate({
-            start: trySnapByPosition(e),
-            end: end
-          })
+          let clone = {...props.state}
+          clone.start = trySnapByPosition(e)
+          props.localUpdate(clone)
         }}
         onDragEnd={e => {
-          props.commitUpdate({
-            start: trySnapByPosition(e),
-            end: end
-          })
+          let clone = {...props.state}
+          clone.start = trySnapByPosition(e)
+          props.commitUpdate(clone)
         }}
         opacity={0}
         radius={snapPointRadius}
@@ -109,16 +108,14 @@ const Relation = props => {
         x={end.point.x}
         y={end.point.y}
         onDragMove={e => {
-          props.localUpdate({
-            start: start,
-            end: trySnapByPosition(e)
-          })
+          let clone = {...props.state}
+          clone.end = trySnapByPosition(e)
+          props.localUpdate(clone)
         }}
         onDragEnd={e => {
-          props.commitUpdate({
-            start: start,
-            end: trySnapByPosition(e)
-          })
+          let clone = {...props.state}
+          clone.end = trySnapByPosition(e)
+          props.commitUpdate(clone)
         }}
         opacity={0}
         radius={snapPointRadius}

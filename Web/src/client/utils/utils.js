@@ -42,12 +42,15 @@ const getModalStyle = () => {
   };
 }
 
+const none = "None"
+
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
   entityMemberRowHeight,
   images,
   colors,
+  none,
   downloadURI,
   getModalStyle
 }
