@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Paper, Button, 
   Select, MenuItem, Grid } from '@material-ui/core';
-import { getModalStyle, colors, none } from '../utils/utils'
+import { getModalStyle, colors, arrowFills, none } from '../utils/utils'
 
 const RelationEditor = props => {
   const [behavior, setBehavior] = useState(() => state => state)
 
-  const handleDashChange = e => {
-    let newValue = e.target.value
+  const handleDashChange = e => enqueueChange(state => {
+    state.dash = e.target.value
+    return state
+  })
+
+  const handleArrowFillChange = e => enqueueChange(state => {
+    state.arrowFill = e.target.value
+    return state
+  })
+
+  const handleThicknessChange = e => enqueueChange(state => {
+    state.thickness = e.target.value
+    return state
+  })
+
+  const enqueueChange = change => {
     let newBehavior = state => {
-      let newState = behavior(state)
-      newState.dash = newValue
-
-      return newState
-    }
-
-    setBehavior(() => newBehavior)
-  }
-
-  const handleThicknessChange = e => {
-    let newValue = e.target.value
-    let newBehavior = state => {
-      let newState = behavior(state)
-      newState.thickness = newValue
+      let newState = change(behavior(state))
 
       return newState
     }
@@ -69,13 +70,13 @@ const RelationEditor = props => {
           <Grid item xs={4}>
             <Select
               style={selectStyle}
-              value={2}
-              // onChange={handleColorChange}
+              value={behavior(props.editable).arrowFill ?? arrowFills[0]}
+              onChange={handleArrowFillChange}
               variant="outlined"
             >
-              {colors.map((color, index) => 
-                <MenuItem value={index} key={index}>
-                  <Button style={{ backgroundColor: color, color: color }}>{color}</Button>
+              {arrowFills.map((fill, index) => 
+                <MenuItem value={fill} key={index}>
+                  Fill: {fill}
                 </MenuItem> 
               )}
             </Select>

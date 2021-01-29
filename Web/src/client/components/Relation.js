@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
-import { snapPointRadius, none } from '../utils/utils'
+import { snapPointRadius, arrowFills, none } from '../utils/utils'
 
 const Relation = props => {
 
@@ -81,7 +81,7 @@ const Relation = props => {
       <Arrow
         points={[start.point.x, start.point.y, end.point.x, end.point.y
         ]}
-        fill='white'
+        fill={props.state.endStyle ?? arrowFills[0]}
         stroke='black'
         strokeWidth={props.state.thickness ?? 1}
         dash={props.state.dash == none ? null : JSON.parse(props.state.dash)}

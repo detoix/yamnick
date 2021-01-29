@@ -209,8 +209,10 @@ const Home = ({socket}) => {
         }}
         updateRelation={(behavior, relation) => {
           let indexOfRelation = relations.findIndex(e => 
-            e.start.point.x == relation.start.point.x 
-            && e.start.point.y == relation.start.point.y)
+            (e.start.point.x == relation.start.point.x 
+              && e.start.point.y == relation.start.point.y) 
+            || (e.end.point.x == relation.end.point.x 
+              && e.end.point.y == relation.end.point.y))
           let relationToUpdate = behavior(relations[indexOfRelation])
 
           updateRelation(indexOfRelation, relationToUpdate)

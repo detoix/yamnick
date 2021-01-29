@@ -44,12 +44,18 @@ const getModalStyle = () => {
 
 const none = "None"
 
+const arrowFills = [
+  'white',
+  'black'
+]
+
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
   entityMemberRowHeight,
   images,
   colors,
+  arrowFills,
   none,
   downloadURI,
   getModalStyle
