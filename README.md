@@ -39,6 +39,15 @@ Web/nodemon.json
 }
 ```
 
+# Tests
+
+jestjs.io is used for unit testing
+
+```sh
+npm run test
+npm run test-silent
+```
+
 [persistence engine]: <https://github.com/detoix/yamnick/blob/master/Web/src/server/persistence.js>
 [nact]: <https://nact.io>
 [dockerized]: <https://github.com/detoix/yamnick/blob/master/Web/Dockerfile>
