@@ -21,7 +21,7 @@ docker build --no-cache -t registry.heroku.com/your_heroku_app_name/web . && doc
 
 # Persistence
 
-Application uses [nact] and persists to postgresql document db via custom [persistence engine]
+Application uses [nact] and persists to postgresql document db with custom [persistence engine]
 
 # Configuration
 
