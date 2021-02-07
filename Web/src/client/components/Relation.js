@@ -81,7 +81,7 @@ const Relation = props => {
       <Arrow
         points={[start.point.x, start.point.y, end.point.x, end.point.y
         ]}
-        fill={props.state.endStyle ?? arrowFills[0]}
+        fill={props.state.arrowFill ?? arrowFills[0]}
         stroke='black'
         strokeWidth={props.state.thickness ?? 1}
         dash={props.state.dash && props.state.dash != none ? JSON.parse(props.state.dash) : null}

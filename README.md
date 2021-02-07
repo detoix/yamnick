@@ -13,7 +13,6 @@ npm run dev
 # Deployment (heroku)
 
 The app is [dockerized] and currently run on heroku
-Assuming your heroku app name as _your_heroku_app_name_
 
 ```sh
 docker build --no-cache -t registry.heroku.com/your_heroku_app_name/web . && docker image prune -f && heroku container:push web -a your_heroku_app_name && heroku container:release web -a your_heroku_app_name
@@ -25,7 +24,7 @@ Application uses [nact] and persists to postgresql document db with custom [pers
 
 # Configuration
 
-Server uses nodemon to provide runtime configuration
+Server uses nodemon to provide runtime dev configuration,
 Web/nodemon.json
 
 ```sh
