@@ -110,7 +110,7 @@ const Home = ({socket}) => {
     })
   }
 
-  const renderMenu = (e, entity) => {
+  const renderMenu = (e, actions) => {
     e.evt.preventDefault();
 
     setMaybeMenu(() => props => {
@@ -121,9 +121,13 @@ const Home = ({socket}) => {
         open={true}
         onClose={() => setMaybeMenu(() => props => null)}
         >
-          <MenuItem onClick={() => props.remove(entity)}>Delete</MenuItem>
-          <MenuItem onClick={() => props.toFront(entity)}>To Front</MenuItem>
-          <MenuItem onClick={() => props.toBack(entity)}>To Back</MenuItem>
+          {actions && actions.map((action, i) => 
+            <MenuItem key={i} onClick={() => {
+                action.invoke()
+                setMaybeMenu(() => props => null)
+              }}>
+              {action.description}
+            </MenuItem>)}
         </Menu>
     })
   }
@@ -149,7 +153,6 @@ const Home = ({socket}) => {
     upToDateEntities.splice(indexOfEntity, 1)
     insertFunction(upToDateEntities, entity)
     pushDiagramWith(upToDateEntities, relations)
-    setMaybeMenu(() => props => null)
   }
 
   const handleWheel = e => {
@@ -223,11 +226,7 @@ const Home = ({socket}) => {
           setEditor(() => props => null)
         }}
       />
-      <MaybeMenu
-        remove={entity => arrangeEntities((array, item) => { }, entity)}
-        toFront={entity => arrangeEntities((array, item) => array.push(item), entity)}
-        toBack={entity => arrangeEntities((array, item) => array.unshift(item), entity)}
-      />
+      <MaybeMenu />
       <div
         id="container"
         style={{ border: '1px solid grey', overflow: 'auto', height: 'calc(100vh - 180px)' }}
@@ -246,7 +245,11 @@ const Home = ({socket}) => {
               <Entity
                 key={index} 
                 state={entity}
-                onContextMenu={e => renderMenu(e, entity)}
+                onContextMenu={e => renderMenu(e, [
+                  {invoke: () => arrangeEntities((array, item) => { }, entity), description: 'Delete' },
+                  {invoke: () => arrangeEntities((array, item) => array.push(item), entity), description: 'To Front'},
+                  {invoke: () => arrangeEntities((array, item) => array.unshift(item), entity), description: 'To Back'}
+                ])}
                 openModal={() => renderEntityEditor(entity)}
                 commitUpdate={updateEntity}
                 localUpdate={resizedEntity => {
@@ -260,6 +263,7 @@ const Home = ({socket}) => {
               <Relation
                 key={index} 
                 state={relation}
+                onContextMenu={renderMenu}
                 entities={entities}
                 openModal={() => renderRelationEditor(relation)}
                 commitUpdate={rel => updateRelation(index, rel)}

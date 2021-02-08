@@ -4,6 +4,10 @@ import { snapPointRadius, arrowFills, none, changeCursor } from '../utils/utils'
 
 const Relation = props => {
 
+  if (!props.state.nodes) {
+    return <Group />
+  }
+
   const trySnapById = node => {
     let newSnapPoint = {
       x: node.point.x,
@@ -71,15 +75,38 @@ const Relation = props => {
     }
   }
 
-  const valid = node => node && node.point
+  const validNode = node => node && node.point
 
-  if (!props.state.nodes) {
-    return <Group />
+  const midNodes = props.state.nodes.slice(1, props.state.nodes.length - 1)
+
+  const onContextMenu = e => {
+    let x = e.target.attrs['x'] ?? Number.MAX_SAFE_INTEGER
+    let y = e.target.attrs['y'] ?? Number.MAX_SAFE_INTEGER
+    let nodeIndex = midNodes.findIndex(e => e.point.x == x && e.point.y == y)
+    
+    if (nodeIndex >= 0) {
+      let clone = {...props.state}
+
+      props.onContextMenu(e,
+        [{
+          invoke: () => {
+            clone.nodes.splice(nodeIndex + 1, 1)
+            props.commitUpdate(clone)
+          }, 
+          description: 'Delete'
+        }])
+    } else {
+      props.onContextMenu(e, 
+        [{
+          invoke: () => props.commitRemove(),
+          description: 'Delete'
+        }])
+    }
   }
 
   let start = trySnapById(props.state.nodes[0])
   let end = trySnapById(props.state.nodes[props.state.nodes.length - 1])
-  let nodes = [start].concat(props.state.nodes.slice(1, props.state.nodes.length - 1)).concat([end])
+  let nodes = [start].concat(midNodes).concat([end])
   let arrowModel = nodes
     .map(e => [e.point.x, e.point.y])
     .reduce((a, b) => a.concat(b))
@@ -88,6 +115,7 @@ const Relation = props => {
     <Group
       onClick={commitRemove}
       onDblclick={e => props.openModal()}
+      onContextMenu={onContextMenu}
     >
       <Arrow
         points={arrowModel}
@@ -104,7 +132,7 @@ const Relation = props => {
         strokeWidth={10}
       />
 
-      {nodes && nodes.filter(valid).map((node, index) => {
+      {nodes && nodes.filter(validNode).map((node, index) => {
         if (index) {
           return <Circle
             draggable
@@ -118,12 +146,14 @@ const Relation = props => {
             }}
             opacity={0.5}
             fill='black'
-            radius={snapPointRadius / 2}
+            radius={snapPointRadius / 3}
+            onMouseEnter={e => changeCursor(e, 'pointer')}
+            onMouseLeave={e => changeCursor(e, 'default')}
           />
         }
       })}
 
-      {nodes && nodes.filter(valid).map((node, index) => 
+      {nodes && nodes.filter(validNode).map((node, index) => 
         <Circle
           draggable
           key={index}
@@ -141,6 +171,8 @@ const Relation = props => {
           }}
           opacity={0}
           radius={snapPointRadius}
+          onMouseEnter={e => changeCursor(e, 'pointer')}
+          onMouseLeave={e => changeCursor(e, 'default')}
         />)}
     </Group>
   )
