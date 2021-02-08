@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Group, Rect, Text, Image, Circle } from 'react-konva';
-import { images, colors, entityMemberRowHeight, snapPointRadius, snapPointVisibleRadius } from '../utils/utils'
+import { images, colors, entityMemberRowHeight,
+  snapPointRadius, snapPointVisibleRadius, changeCursor } from '../utils/utils'
 import useImage from 'use-image'
 
 const Entity = props => {
@@ -93,13 +94,13 @@ const Entity = props => {
           key={index} 
           text={member.name} 
         />)}
-      <Image 
+      {image && <Image 
         image={image}
         x={props.state.width - 50}
         y={-45}
         scaleX={0.35}
         scaleY={0.35}
-      />
+      />}
 
       {props.state.edgePoints().filter(snapPoint => snapPoint.direction != "default").map((snapPoint, index) => 
         <Circle 
@@ -107,14 +108,8 @@ const Entity = props => {
           x={snapPoint.x - props.state.x} 
           y={snapPoint.y - props.state.y} 
           radius={snapPointRadius} 
-          onMouseEnter={e => {
-            const container = e.target.getStage().container();
-            container.style.cursor = snapPoint.direction;
-          }}
-          onMouseLeave={e => {
-            const container = e.target.getStage().container();
-            container.style.cursor = "default";
-          }}
+          onMouseEnter={e => changeCursor(e, snapPoint.direction)}
+          onMouseLeave={e => changeCursor(e, "default")}
           onDragMove={e => changeSize(e, snapPoint, props.localUpdate)}
           onDragEnd={e => changeSize(e, snapPoint, props.commitUpdate)}
           resizeNode

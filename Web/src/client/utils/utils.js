@@ -6,6 +6,7 @@ const snapPointRadius = 15
 const snapPointVisibleRadius = 4
 const entityMemberRowHeight = 15
 const images = [
+  null,
   lion,
   dog,
   duck
@@ -49,6 +50,11 @@ const arrowFills = [
   'black'
 ]
 
+const changeCursor = (e, style) => {
+  const container = e.target.getStage().container()
+  container.style.cursor = style
+}
+
 export { 
   snapPointRadius, 
   snapPointVisibleRadius,
@@ -58,5 +64,6 @@ export {
   arrowFills,
   none,
   downloadURI,
-  getModalStyle
+  getModalStyle,
+  changeCursor
 }

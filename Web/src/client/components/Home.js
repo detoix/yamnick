@@ -16,7 +16,7 @@ const Home = ({socket}) => {
   const stageRef = useRef()
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
-  const [MaybeEntityEditor, setMaybeEntityEditor] = useState(() => props => null)
+  const [MaybeEditor, setEditor] = useState(() => props => null)
   const [MaybeMenu, setMaybeMenu] = useState(() => props => null)
 
   useEffect(() => {
@@ -72,18 +72,20 @@ const Home = ({socket}) => {
 
     let upToDateRelations = (relations ?? []).concat(draggedItemRef.current != 'relation' ? [] : [
       {
-        start: {
-          point: {
-            x: dropPosition.x - 50,
-            y: dropPosition.y - 50
+        nodes: [
+          {
+            point: {
+              x: dropPosition.x - 50,
+              y: dropPosition.y - 50
+            }
+          },
+          {
+            point: {
+              x: dropPosition.x + 50,
+              y: dropPosition.y + 50
+            }
           }
-        },
-        end: {
-          point: {
-            x: dropPosition.x + 50,
-            y: dropPosition.y + 50
-          }
-        }
+        ]
       }
     ])
 
@@ -91,7 +93,7 @@ const Home = ({socket}) => {
   }
 
   const renderEntityEditor = entity => {
-    setMaybeEntityEditor(() => props => {
+    setEditor(() => props => {
       return <EntityEditor
         editable={entity}
         handleClose={behavior => props.updateEntity(behavior, entity)}
@@ -100,7 +102,7 @@ const Home = ({socket}) => {
   }
 
   const renderRelationEditor = relation => {
-    setMaybeEntityEditor(() => props => {
+    setEditor(() => props => {
       return <RelationEditor
         editable={relation}
         handleClose={behavior => props.updateRelation(behavior, relation)}
@@ -199,24 +201,26 @@ const Home = ({socket}) => {
           Diagram
         </Button>
       </Toolbar>
-      <MaybeEntityEditor 
+      <MaybeEditor 
         updateEntity={(behavior, entity) => {
           let indexOfEntity = entities.findIndex(e => e.id == entity.id)
           let entityToUpdate = behavior(entities[indexOfEntity])
 
           updateEntity(entityToUpdate)
-          setMaybeEntityEditor(() => props => null)
+          setEditor(() => props => null)
         }}
         updateRelation={(behavior, relation) => {
-          let indexOfRelation = relations.findIndex(e => 
-            (e.start.point.x == relation.start.point.x 
-              && e.start.point.y == relation.start.point.y) 
-            || (e.end.point.x == relation.end.point.x 
-              && e.end.point.y == relation.end.point.y))
+          let start = relation.nodes[0].point
+          let end = relation.nodes[relation.nodes.length - 1].point
+          let indexOfRelation = relations.filter(e => e.nodes).findIndex(e => 
+            (e.nodes[0].point.x == start.x 
+              && e.nodes[0].point.y == start.y) 
+            || (e.nodes[relation.nodes.length - 1].point.x == end.x 
+              && e.nodes[relation.nodes.length - 1].point.y == end.y))
           let relationToUpdate = behavior(relations[indexOfRelation])
 
           updateRelation(indexOfRelation, relationToUpdate)
-          setMaybeEntityEditor(() => props => null)
+          setEditor(() => props => null)
         }}
       />
       <MaybeMenu

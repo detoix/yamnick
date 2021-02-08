@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Group, Rect, Text, Circle, Line, Arrow } from 'react-konva';
-import { snapPointRadius, arrowFills, none } from '../utils/utils'
+import { Group, Circle, Line, Arrow } from 'react-konva';
+import { snapPointRadius, arrowFills, none, changeCursor } from '../utils/utils'
 
 const Relation = props => {
 
@@ -65,13 +65,24 @@ const Relation = props => {
   }
 
   const commitRemove = e => {
-    if (e.evt.shiftKey) { 
-      props.commitRemove() 
+    if (e.evt.shiftKey) {
+      props.commitRemove()
+      changeCursor(e, 'default')
     }
   }
 
-  let start = trySnapById(props.state.start)
-  let end = trySnapById(props.state.end)
+  const valid = node => node && node.point
+
+  if (!props.state.nodes) {
+    return <Group />
+  }
+
+  let start = trySnapById(props.state.nodes[0])
+  let end = trySnapById(props.state.nodes[props.state.nodes.length - 1])
+  let nodes = [start].concat(props.state.nodes.slice(1, props.state.nodes.length - 1)).concat([end])
+  let arrowModel = nodes
+    .map(e => [e.point.x, e.point.y])
+    .reduce((a, b) => a.concat(b))
 
   return (
     <Group
@@ -79,47 +90,58 @@ const Relation = props => {
       onDblclick={e => props.openModal()}
     >
       <Arrow
-        points={[start.point.x, start.point.y, end.point.x, end.point.y
-        ]}
+        points={arrowModel}
         fill={props.state.arrowFill ?? arrowFills[0]}
         stroke='black'
         strokeWidth={props.state.thickness ?? 1}
         dash={props.state.dash && props.state.dash != none ? JSON.parse(props.state.dash) : null}
       />
-      <Circle
+      <Line
         draggable
-        x={start.point.x}
-        y={start.point.y}
-        onDragMove={e => {
-          let clone = {...props.state}
-          clone.start = trySnapByPosition(e)
-          props.localUpdate(clone)
-        }}
-        onDragEnd={e => {
-          let clone = {...props.state}
-          clone.start = trySnapByPosition(e)
-          props.commitUpdate(clone)
-        }}
+        points={arrowModel}
+        stroke='black'
         opacity={0}
-        radius={snapPointRadius}
+        strokeWidth={10}
       />
-      <Circle
-        draggable
-        x={end.point.x}
-        y={end.point.y}
-        onDragMove={e => {
-          let clone = {...props.state}
-          clone.end = trySnapByPosition(e)
-          props.localUpdate(clone)
-        }}
-        onDragEnd={e => {
-          let clone = {...props.state}
-          clone.end = trySnapByPosition(e)
-          props.commitUpdate(clone)
-        }}
-        opacity={0}
-        radius={snapPointRadius}
-      />
+
+      {nodes && nodes.filter(valid).map((node, index) => {
+        if (index) {
+          return <Circle
+            draggable
+            key={index}
+            x={(nodes[index - 1].point.x + node.point.x) / 2}
+            y={(nodes[index - 1].point.y + node.point.y) / 2}
+            onDragEnd={e => {
+              let clone = {...props.state}
+              clone.nodes.splice(index, 0, trySnapByPosition(e))
+              props.commitUpdate(clone)
+            }}
+            opacity={0.5}
+            fill='black'
+            radius={snapPointRadius / 2}
+          />
+        }
+      })}
+
+      {nodes && nodes.filter(valid).map((node, index) => 
+        <Circle
+          draggable
+          key={index}
+          x={node.point.x}
+          y={node.point.y}
+          onDragMove={e => {
+            let clone = {...props.state}
+            clone.nodes[index] = trySnapByPosition(e)
+            props.localUpdate(clone)
+          }}
+          onDragEnd={e => {
+            let clone = {...props.state}
+            clone.nodes[index] = trySnapByPosition(e)
+            props.commitUpdate(clone)
+          }}
+          opacity={0}
+          radius={snapPointRadius}
+        />)}
     </Group>
   )
 }
