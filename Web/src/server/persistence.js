@@ -2,17 +2,21 @@ const { PostgresPersistenceEngine } = require('nact-persistence-postgres')
 
 module.exports = class PostgresDocumentDBEngine extends PostgresPersistenceEngine {
   async persist (persistedEvent) {
+    const id = persistedEvent.data.payload.id
+
+    console.log('wtf', id)
+
     const query = `
       INSERT INTO ${this.tablePrefix}event_journal (
-        ordering,
+        ${id ? 'ordering,' : ''}
         persistence_key,
         sequence_nr,
         created_at,
         data,
         tags
-      ) VALUES (${persistedEvent.data.payload.id}, $/key/, $/sequenceNumber/, $/createdAt/, $/data:json/, $/tags/)
+      ) VALUES (${id ? id + ', ' : ''}$/key/, $/sequenceNumber/, $/createdAt/, $/data:json/, $/tags/)
       ON CONFLICT (ordering)
-      DO UPDATE SET data = $/data:json/
+      DO UPDATE SET data = $/data:json/, persistence_key = $/key/
       RETURNING ordering;
     `;
     return (await this.db).one(
@@ -22,6 +26,10 @@ module.exports = class PostgresDocumentDBEngine extends PostgresPersistenceEngin
         createdAt: persistedEvent.createdAt,
         data: persistedEvent.data,
         tags: persistedEvent.tags
+      },
+      persisted => {
+        persistedEvent.data.payload.id = persisted.ordering
+        persistedEvent.key = persistedEvent.key.replace(undefined, persisted.ordering)
       }
     )
   }

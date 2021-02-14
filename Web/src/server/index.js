@@ -11,10 +11,16 @@ const io = socketIo(server)
 const sockets = new Set()
 const system = start(configurePersistence(new PostgresDocumentDBEngine(process.env.HEROKU_POSTGRESQL_ONYX_URL)))
 
-const diagramBehavior = async (state = { entities: [], relations: [] }, msg, ctx) => {
+const diagramBehavior = async (state = {}, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
 
-  if (msg.type === "QUERY") {
+  console.log(state)
+
+  if (isNaN(msg.payload.id) && !ctx.recovering) {
+    const empty = {}
+    await ctx.persist({ type: "DIAGRAM", payload: empty })
+    dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: {id: empty.id, uuid: msg.payload.id}, sender: ctx.self })
+  } else if (msg.type === "QUERY") {    
     dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: state, sender: ctx.self })
   } else if (msg.type === "DIAGRAM") {
     if (!ctx.recovering) {
@@ -29,12 +35,14 @@ const diagramBehavior = async (state = { entities: [], relations: [] }, msg, ctx
 
       let availableId = Math.max(...idsInUse) + 1
 
-      msg.payload.entities.forEach(entity => {
-        if (!idsInUse.has(entity.id)) {
-          entity.id = availableId
-          availableId = availableId + 1
-        }
-      })
+      if (msg.payload.entities) {
+        msg.payload.entities.forEach(entity => {
+          if (!idsInUse.has(entity.id)) {
+            entity.id = availableId
+            availableId = availableId + 1
+          }
+        })
+      }
 
       await ctx.persist({ type: "DIAGRAM", payload: msg.payload })
       console.log(`Diagram of id ${msg.payload.id} persisted`)
