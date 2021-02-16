@@ -14,8 +14,6 @@ const system = start(configurePersistence(new PostgresDocumentDBEngine(process.e
 const diagramBehavior = async (state = {}, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
 
-  console.log(state)
-
   if (msg.type === "QUERY") {    
     dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: state, sender: ctx.self })
   } else if (msg.type === "DIAGRAM") {
