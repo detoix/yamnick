@@ -23,7 +23,6 @@ const Home = ({socket}) => {
 
   useEffect(() => {
     socket.on("DIAGRAM_PERSISTED", data => {
-      console.log(data)
       if (data.id == id) {
         setEntities(data.entities
           .map(e => new ExtendedEntity(e)))

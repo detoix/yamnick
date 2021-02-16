@@ -16,11 +16,7 @@ const diagramBehavior = async (state = {}, msg, ctx) => {
 
   console.log(state)
 
-  if (isNaN(msg.payload.id) && !ctx.recovering) {
-    const empty = {}
-    await ctx.persist({ type: "DIAGRAM", payload: empty })
-    dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: {id: empty.id, uuid: msg.payload.id}, sender: ctx.self })
-  } else if (msg.type === "QUERY") {    
+  if (msg.type === "QUERY") {    
     dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: state, sender: ctx.self })
   } else if (msg.type === "DIAGRAM") {
     if (!ctx.recovering) {
@@ -44,7 +40,18 @@ const diagramBehavior = async (state = {}, msg, ctx) => {
         })
       }
 
+      let requestId = msg.payload.id
+
+      if (isNaN(msg.payload.id)) {
+        msg.payload.id = null
+      }
+      
       await ctx.persist({ type: "DIAGRAM", payload: msg.payload })
+      
+      if (msg.payload.id != requestId) {
+        msg.payload.uuid = requestId
+      }
+
       console.log(`Diagram of id ${msg.payload.id} persisted`)
       dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: msg.payload, sender: ctx.self })  
     }
