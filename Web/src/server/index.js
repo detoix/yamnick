@@ -89,7 +89,6 @@ const openConnectionBetween = (socket, router) => {
   sockets.add(socket)
   
   socket.on("REQUEST_ISSUED", (data) => {
-      console.log("Server forwarding request of", data)
       dispatch(router, { type: "REQUEST", payload: JSON.parse(data) })
   })
 
