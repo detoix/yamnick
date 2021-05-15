@@ -57,6 +57,10 @@ const routerBehavior = (msg, ctx) => {
       let diagram = spawnPersistent(
         router, diagramBehavior, `diagram:${msg.payload.diagram.id}`)
       dispatch(diagram, { type: "DIAGRAM", payload: msg.payload.diagram, sender: ctx.self })
+    } else if (msg.payload.pointerMoved) {
+      for (let socket of sockets) {
+        socket.emit("DIAGRAM_PERSISTED", msg.payload)
+      }
     }
   } else if (msg.type === "DIAGRAM_PERSISTED") {
 
