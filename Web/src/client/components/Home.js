@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
+import { useHistory } from "react-router";
 import { Stage, Layer, Circle } from 'react-konva';
 import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
 import { Class, ArrowRightAlt, GetApp } from '@material-ui/icons'
@@ -12,6 +13,7 @@ import RelationEditor from './RelationEditor'
 
 const Home = ({socket}) => {
   const { id } = useParams()
+  const history = useHistory();
   const draggedItemRef = useRef()
   const stageRef = useRef()
   const [color] = useState(randomColor())
@@ -27,7 +29,7 @@ const Home = ({socket}) => {
         if (data.entities && data.relations) {
           setEntities(data.entities
             .map(e => new ExtendedEntity(e)))
-            setRelations(data.relations)
+          setRelations(data.relations)
         } else if (data.pointerMoved && data.pointerMoved.color != color) {
           let copy = [...participants]
           let index = copy.findIndex(e => e.color == data.pointerMoved.color)
@@ -40,7 +42,9 @@ const Home = ({socket}) => {
 
           setParticipants(copy)
         }
-      } else if (!data.id) {
+      } else if (data.uuid) {
+        history.push({ pathname:  "/diagram/" + data.id })
+      } else {
         setEntities([])
         setRelations([])
       }
