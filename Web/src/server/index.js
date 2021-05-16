@@ -70,6 +70,10 @@ const routerBehavior = (msg, ctx) => {
       let diagram = spawnPersistent(
         router, diagramBehavior, `diagram:${msg.payload.diagram.id}`)
       dispatch(diagram, { type: "DIAGRAM", payload: msg.payload.diagram, sender: ctx.self })
+    } else if (msg.payload.pointerMoved) {
+      for (let socket of sockets) {
+        socket.emit("DIAGRAM_PERSISTED", msg.payload)
+      }
     }
   } else if (msg.type === "DIAGRAM_PERSISTED") {
 
@@ -85,7 +89,6 @@ const openConnectionBetween = (socket, router) => {
   sockets.add(socket)
   
   socket.on("REQUEST_ISSUED", (data) => {
-      console.log("Server forwarding request of", data)
       dispatch(router, { type: "REQUEST", payload: JSON.parse(data) })
   })
 

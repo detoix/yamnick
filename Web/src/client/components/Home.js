@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
 import { useHistory } from "react-router";
-import { Stage, Layer } from 'react-konva';
+import { Stage, Layer, Circle } from 'react-konva';
 import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
 import { Class, ArrowRightAlt, GetApp } from '@material-ui/icons'
-import { downloadURI } from '../utils/utils'
+import { downloadURI, snapPointVisibleRadius, randomColor } from '../utils/utils'
 import Entity from './Entity'
 import EntityEditor from './EntityEditor'
 import Relation from './Relation'
@@ -16,6 +16,8 @@ const Home = ({socket}) => {
   const history = useHistory();
   const draggedItemRef = useRef()
   const stageRef = useRef()
+  const [color] = useState(randomColor())
+  const [participants, setParticipants] = useState([])
   const [entities, setEntities] = useState([])
   const [relations, setRelations] = useState([])
   const [MaybeEditor, setEditor] = useState(() => props => null)
@@ -24,9 +26,22 @@ const Home = ({socket}) => {
   useEffect(() => {
     socket.on("DIAGRAM_PERSISTED", data => {
       if (data.id == id) {
-        setEntities(data.entities
-          .map(e => new ExtendedEntity(e)))
-        setRelations(data.relations)
+        if (data.entities && data.relations) {
+          setEntities(data.entities
+            .map(e => new ExtendedEntity(e)))
+          setRelations(data.relations)
+        } else if (data.pointerMoved && data.pointerMoved.color != color) {
+          let copy = [...participants]
+          let index = copy.findIndex(e => e.color == data.pointerMoved.color)
+
+          if (index > -1) { 
+            copy[index] = data.pointerMoved
+          } else {
+            copy.push(data.pointerMoved)
+          }
+
+          setParticipants(copy)
+        }
       } else if (data.uuid) {
         history.push({ pathname:  "/diagram/" + data.id })
       } else {
@@ -242,6 +257,19 @@ const Home = ({socket}) => {
           width={2000}
           height={1000}
           ref={stageRef}
+          onMouseMove={() => {
+            let pointerPosition = stageRef.current.getPointerPosition();
+            let request = {
+              id: id,
+              pointerMoved: {
+                x: pointerPosition.x,
+                y: pointerPosition.y,
+                color: color
+              }
+            }
+        
+            socket.emit("REQUEST_ISSUED", JSON.stringify(request))
+          }}
           onWheel={handleWheel}
         >
           <Layer>
@@ -283,6 +311,14 @@ const Home = ({socket}) => {
                 }} 
               />)}
 
+            {participants && participants.map((participant, index) =>
+              <Circle
+                key={index}
+                x={participant.x} 
+                y={participant.y} 
+                fill={participant.color} 
+                radius={snapPointVisibleRadius}
+              />)}
           </Layer>
         </Stage>
       </div>

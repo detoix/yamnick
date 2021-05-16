@@ -30,6 +30,8 @@ const downloadURI = (uri, name) => {
   document.body.removeChild(link);
 }
 
+const randomColor = () => "#" + ((1<<24)*Math.random() | 0).toString(16)
+
 const getModalStyle = () => {
   const top = 50;
   const left = 50;
@@ -65,5 +67,6 @@ export {
   none,
   downloadURI,
   getModalStyle,
-  changeCursor
+  changeCursor,
+  randomColor
 }
