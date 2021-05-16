@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/extend-expect'
 import 'babel-polyfill';
 import { diagramBehavior, routerBehavior } from '../server/behaviors.js'
 import '../server/persistence'
-import { dispatch, spawnStateless, spawnPersistent } from 'nact'
+import { dispatch, spawnPersistent } from 'nact'
 
 jest.mock('nact')
 jest.mock('../server/persistence')
@@ -131,4 +131,116 @@ test('diagram responses to query with current state', async () => {
 
   expect(sender).toBe(receiver)
   expect(response.payload).toBe(state)
+})
+
+test('diagram saved for the first time gets new id and responses with request uuid', async () => {
+
+  let response = null
+  let receiver = null
+
+  dispatch.mockImplementation((actor, msg) => {
+    receiver = actor
+    response = msg
+  })
+
+  let originalRequestId = 'not-a-number'
+  let diagramIdAssinedByPersistenceEngine = 109
+
+  let sender = {}
+  let state = {}
+  let ctx = {
+    recovering: false,
+    persist: newState => {
+      newState.payload.id = diagramIdAssinedByPersistenceEngine
+    }
+  }
+  let msg = {
+    type: "DIAGRAM",
+    sender: sender,
+    payload: {
+      id: originalRequestId,
+    }
+  }
+
+  await diagramBehavior(state, msg, ctx)
+
+  expect(sender).toBe(receiver)
+  expect(response.payload).toBe(msg.payload)
+  expect(response.payload).toMatchObject({
+    id: diagramIdAssinedByPersistenceEngine,
+    uuid: originalRequestId
+  })
+})
+
+test('diagram actor assigns incrementing ids to entities during creating diagram', async () => {
+
+  let persisted = null
+
+  let sender = {}
+  let state = {}
+  let ctx = {
+    recovering: false,
+    persist: msg => {
+      persisted = msg
+    }
+  }
+  let msg = {
+    type: "DIAGRAM",
+    sender: sender,
+    payload: {
+      id: 'not-a-number',
+      entities: [
+        {}, {}, {}
+      ]
+    }
+  }
+
+  await diagramBehavior(state, msg, ctx)
+
+  expect(persisted.payload).toMatchObject({
+    entities: [
+      { id: 1 },
+      { id: 2 },
+      { id: 3 }
+    ]
+  })
+})
+
+test('diagram actor assigns incrementing ids to new entities when some already exist in diagram', async () => {
+
+  let persisted = null
+
+  let sender = {}
+  let state = {
+    entities: [
+      { id: 1 },
+      { id: 3 }
+    ]
+  }
+  let ctx = {
+    recovering: false,
+    persist: msg => {
+      persisted = msg
+    }
+  }
+  let msg = {
+    type: "DIAGRAM",
+    sender: sender,
+    payload: {
+      id: 9,
+      entities: [
+        {}, {}, {}
+      ]
+    }
+  }
+
+  await diagramBehavior(state, msg, ctx)
+
+  expect(persisted.payload).toMatchObject({
+    entities: [
+      { id: 4 },
+      { id: 5 },
+      { id: 6 }
+    ]
+  })
 })
