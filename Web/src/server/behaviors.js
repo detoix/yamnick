@@ -50,8 +50,6 @@ const diagramBehavior = async (state = {}, msg, ctx) => {
 const routerBehavior = (sockets, msg, ctx) => {
 
   if (msg.type === "REQUEST") {
-    console.log(`Gateway processing message of type ${msg.type}`)
-
     if (msg.payload.queryForDiagram) {
       let diagram = spawnPersistent(
         ctx.self, diagramBehavior, `diagram:${msg.payload.queryForDiagram.id}`)
