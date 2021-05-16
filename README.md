@@ -1,6 +1,6 @@
 # Yamnick
 
-Yamnick is a real-time collaboration diagramming tool built with [react], [express] and [socket.io]. 
+Yamnick is a real-time collaboration diagramming tool built with [react], [express] and [socket.io]. See [demo].
 
 # Prerequisites
 
@@ -47,6 +47,7 @@ npm run test
 npm run test-silent
 ```
 
+[demo]: <https://secure-brushlands-76941.herokuapp.com>
 [react]: <https://reactjs.org>
 [express]: <https://expressjs.com>
 [postgresql]: <https://www.postgresql.org>
