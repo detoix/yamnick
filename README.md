@@ -41,6 +41,7 @@ Application uses [nact] and persists to [postgresql] with custom [persistence en
 # Tests
 
 [jest] is used for unit testing
+
 [![Node.js CI](https://github.com/detoix/yamnick/actions/workflows/node.js.yml/badge.svg)](https://github.com/detoix/yamnick/actions/workflows/node.js.yml)
 
 ```sh
