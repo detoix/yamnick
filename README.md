@@ -1,31 +1,11 @@
 # Yamnick
 
-Yamnick is a real-time collaboration diagramming tool built with react, express and socket.io. 
+Yamnick is a real-time collaboration diagramming tool built with [react], [express] and [socket.io]. 
 
-# Running
+# Prerequisites
 
-```sh
-cd Web
-npm install
-npm run dev
-```
-
-# Deployment (heroku)
-
-The app is [dockerized] and currently run on heroku
-
-```sh
-docker build --no-cache -t registry.heroku.com/your_heroku_app_name/web . && docker image prune -f && heroku container:push web -a your_heroku_app_name && heroku container:release web -a your_heroku_app_name
-```
-
-# Persistence
-
-Application uses [nact] and persists to postgresql document db with custom [persistence engine]
-
-# Configuration
-
-Server uses nodemon to provide runtime dev configuration,
-Web/nodemon.json
+Server uses [nodemon] to provide runtime dev configuration,
+your Web/nodemon.json should look like this
 
 ```sh
 {
@@ -38,15 +18,41 @@ Web/nodemon.json
 }
 ```
 
+# Running
+
+```sh
+cd Web
+npm install
+npm run dev
+```
+
+# Deployment (heroku)
+
+The app is [dockerized] and currently runs on heroku
+
+```sh
+docker build --no-cache -t registry.heroku.com/your_heroku_app_name/web . && docker image prune -f && heroku container:push web -a your_heroku_app_name && heroku container:release web -a your_heroku_app_name
+```
+
+# Persistence
+
+Application uses [nact] and persists to postgresql document db with custom [persistence engine]
+
 # Tests
 
-jestjs.io is used for unit testing
+[jest] is used for unit testing
 
 ```sh
 npm run test
 npm run test-silent
 ```
 
+[react]: <https://reactjs.org>
+[express]: <https://expressjs.com>
+[postgresql]: <https://www.postgresql.org>
+[socket.io]: <https://socket.io>
 [persistence engine]: <https://github.com/detoix/yamnick/blob/master/Web/src/server/persistence.js>
 [nact]: <https://nact.io>
 [dockerized]: <https://github.com/detoix/yamnick/blob/master/Web/Dockerfile>
+[nodemon]: <https://nodemon.io>
+[jest]: <https://jestjs.io>
