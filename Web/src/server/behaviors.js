@@ -3,8 +3,17 @@ const { dispatch, spawnPersistent } = require('nact')
 const diagramBehavior = async (state = {}, msg, ctx) => {
   console.log(`Diagram of id ${state.id} processing message of type ${msg.type}`)
 
-  if (msg.type === "QUERY") {    
-    dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: state, sender: ctx.self })
+  if (msg.type === "QUERY") {
+    let response = state
+    if (Object.keys(state).length === 0) {
+      response = {
+        id: msg.payload.id,
+        entities: [],
+        relations: []
+      }
+    }
+
+    dispatch(msg.sender, { type: "DIAGRAM_PERSISTED", payload: response, sender: ctx.self })
   } else if (msg.type === "DIAGRAM") {
     if (!ctx.recovering) {
 
@@ -49,7 +58,13 @@ const diagramBehavior = async (state = {}, msg, ctx) => {
 
 const routerBehavior = (sockets, msg, ctx) => {
 
-  if (msg.type === "REQUEST") {
+  if (msg.type === "DIAGRAM_PERSISTED" || msg.payload.pointerMoved) {
+    for (let socket of sockets) {
+      if (msg.payload.id == socket.diagramId) {
+        socket.emit("DIAGRAM_PERSISTED", msg.payload)
+      }
+    }
+  } else if (msg.type === "REQUEST") {
     if (msg.payload.queryForDiagram) {
       let diagram = spawnPersistent(
         ctx.self, diagramBehavior, `diagram:${msg.payload.queryForDiagram.id}`)
@@ -58,15 +73,6 @@ const routerBehavior = (sockets, msg, ctx) => {
       let diagram = spawnPersistent(
         ctx.self, diagramBehavior, `diagram:${msg.payload.diagram.id}`)
       dispatch(diagram, { type: "DIAGRAM", payload: msg.payload.diagram, sender: ctx.self })
-    } else if (msg.payload.pointerMoved) {
-      for (let socket of sockets) {
-        socket.emit("DIAGRAM_PERSISTED", msg.payload)
-      }
-    }
-  } else if (msg.type === "DIAGRAM_PERSISTED") {
-    for (let socket of sockets) {
-      socket.emit("DIAGRAM_PERSISTED", msg.payload)
-      console.log("Message emitted to client")
     }
   }
 }

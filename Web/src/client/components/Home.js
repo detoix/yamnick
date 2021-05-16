@@ -54,7 +54,7 @@ const Home = ({socket}) => {
   });
 
   useEffect(() => {
-    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: id } }))
+    socket.emit("REQUEST_ISSUED", JSON.stringify({ queryForDiagram: { id: id }, diagramId: id }))
   }, [id]);
 
   const pushDiagramWith = (upToDateEntities, upToDateRelations) => {

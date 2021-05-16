@@ -17,7 +17,11 @@ const openConnectionBetween = (socket, router) => {
   sockets.add(socket)
   
   socket.on("REQUEST_ISSUED", (data) => {
-      dispatch(router, { type: "REQUEST", payload: JSON.parse(data) })
+      let payload = JSON.parse(data)
+      if (payload.diagramId) {
+        socket.diagramId = payload.diagramId
+      }
+      dispatch(router, { type: "REQUEST", payload: payload })
   })
 
   socket.on("disconnect", () => 
