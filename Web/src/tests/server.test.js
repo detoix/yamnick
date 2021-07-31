@@ -124,6 +124,32 @@ test('router forwards pointer moved and diagram persisted events to all subscrib
   expect(handlerC).toHaveBeenCalledTimes(0)
 })
 
+test('router forwards fresh diagram persisted event to socket subscribed for uuid', () => {
+
+  let currentDiagramId = 59
+  let currentDiagramUuid = "dupa1"
+  let diagramPersistedMsg = {
+    type: "DIAGRAM_PERSISTED",
+    payload: {
+      id: currentDiagramId,
+      uuid: currentDiagramUuid
+    }
+  }
+  
+  let handler = jest.fn()
+  let socket = {
+    diagramId: currentDiagramUuid,
+    emit: handler
+  }
+  
+  let sockets = new Set()
+  sockets.add(socket)
+
+  routerBehavior(sockets, diagramPersistedMsg, {})
+
+  expect(handler).toHaveBeenNthCalledWith(1, "DIAGRAM_PERSISTED", diagramPersistedMsg.payload)
+})
+
 test('message will be returned when diagram not found', async () => {
 
   let response = null
