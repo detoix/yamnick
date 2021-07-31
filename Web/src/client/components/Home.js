@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { withRouter, useParams } from 'react-router-dom'  
 import { useHistory } from "react-router";
 import { Stage, Layer, Circle } from 'react-konva';
-import { Toolbar, Button, Menu, MenuItem } from '@material-ui/core';
+import { Toolbar, Button, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { Class, ArrowRightAlt, GetApp } from '@material-ui/icons'
 import { downloadURI, snapPointVisibleRadius, randomColor } from '../utils/utils'
 import Entity from './Entity'
@@ -18,8 +18,8 @@ const Home = ({socket}) => {
   const stageRef = useRef()
   const [color] = useState(randomColor())
   const [participants, setParticipants] = useState([])
-  const [entities, setEntities] = useState([])
-  const [relations, setRelations] = useState([])
+  const [entities, setEntities] = useState(null)
+  const [relations, setRelations] = useState(null)
   const [MaybeEditor, setEditor] = useState(() => props => null)
   const [MaybeMenu, setMaybeMenu] = useState(() => props => null)
 
@@ -195,18 +195,24 @@ const Home = ({socket}) => {
     }
   }
 
+  const emptyDiagram = () => entities && !entities.length && relations && !relations.length
+
   return (
     <div>
       <Toolbar>
-        <Button
-          disableRipple={true}
-          draggable="true"
-          onDragStart={e => {
-            draggedItemRef.current = 'entity';
-          }}>
-          <Class />
-          Entity
-        </Button>
+        <Tooltip title="Drag me on canvas" open={emptyDiagram() ?? false} arrow>
+          <Button
+            color={emptyDiagram() ? "secondary" : "default"}
+            variant={emptyDiagram() ? "contained" : "text"}
+            disableRipple={true}
+            draggable="true"
+            onDragStart={e => {
+              draggedItemRef.current = 'entity';
+            }}>
+            <Class />
+            Entity
+          </Button>
+        </Tooltip>
         <Button
           disableRipple={true}
           draggable="true"

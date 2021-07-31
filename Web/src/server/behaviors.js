@@ -60,7 +60,7 @@ const routerBehavior = (sockets, msg, ctx) => {
 
   if (msg.type === "DIAGRAM_PERSISTED" || msg.payload.pointerMoved) {
     for (let socket of sockets) {
-      if (msg.payload.id == socket.diagramId) {
+      if (msg.payload.id == socket.diagramId || msg.payload.uuid == socket.diagramId) {
         socket.emit("DIAGRAM_PERSISTED", msg.payload)
       }
     }
