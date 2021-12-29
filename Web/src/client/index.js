@@ -18,6 +18,7 @@ ReactDOM.render(
     domain={config.domain}
     client_id={config.clientId}
     audience={config.audience}
+    cacheLocation={config.cacheLocation}
     redirect_uri={window.location.origin}
     onRedirectCallback={onRedirectCallback}
   >

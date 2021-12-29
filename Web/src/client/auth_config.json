@@ -1,5 +1,6 @@
 {
     "domain": "detoix.eu.auth0.com",
     "clientId": "TjELIr1Z0KFbvJnZakGrQygwewF6eXqV",
-    "audience": "crawling-system-api"
+    "audience": "crawling-system-api",
+    "cacheLocation": "localstorage"
 }
